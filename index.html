@@ -126,6 +126,13 @@
   button.on{background:#7ee08a;color:#0d2a3d}
   button:disabled{background:#20455c;opacity:.5;cursor:not-allowed}
 
+  .rise.target .balloon{outline:4px solid #fff;outline-offset:6px;
+    box-shadow:0 0 0 8px rgba(47,168,224,.35);border-radius:50% 50% 50% 50%/58% 58% 42% 42%}
+  .rise.wrong .balloon{animation:shake .45s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
+  #heard .vs{font-size:13px;opacity:.8;margin-inline-start:6px;font-family:system-ui,sans-serif}
+  #heard .no{font-size:12px;opacity:.5;font-family:system-ui,sans-serif}
+
   #cal{position:absolute;inset:0;background:rgba(8,30,45,.93);display:none;
        place-items:center;z-index:8;color:#eaf6ff}
   #cal.show{display:grid}
@@ -419,6 +426,7 @@ function micTick(){
   micRAF = requestAnimationFrame(micTick);
   const r = micRms();
   $('meter').style.width = Math.min(100, r*350) + '%';
+  if(level().mic && running) markTarget();
   if(r > 0.055){                                    // speaking
     if(!utt) utt = {peak:0, spec:null, quiet:0};
     utt.quiet = 0;
@@ -440,25 +448,49 @@ function classify(spec){
   const order = Object.keys(d).sort((a,b) => d[a]-d[b]);
   // Nearest-centroid always names a winner. Demand a margin, or a mumble pops
   // a balloon and the child learns nothing.
-  if(d[order[0]] / (d[order[1]] || 1) > 0.85) return null;
+  if(d[order[0]] / (d[order[1]] || 1) > 0.80) return null;
   return order[0];
 }
+
+// The balloon being read: highest on screen, so closest to escaping.
+function currentTarget(){
+  let best = null, top = Infinity;
+  for(const el of field.children){
+    if(el.dataset.done) continue;
+    const t = el.getBoundingClientRect().top;
+    if(t < top){ top = t; best = el; }
+  }
+  return best;
+}
+
+function markTarget(){
+  const t = currentTarget();
+  for(const el of field.children) el.classList.toggle('target', el === t);
+}
+
+const glyphOf = v => (VOWELS.find(x => x[0] === v) || [])[2] || '—';
 
 function onUtterance(spec){
   if(calWaiter){ const f = calWaiter; calWaiter = null; f(spec); return; }
   const v = classify(spec);
-  const glyph = v ? (VOWELS.find(x => x[0] === v) || [])[2] : null;
-  $('heard').textContent = glyph || '—';
-  $('heard').className = v ? '' : 'no';
-  if(!v || !running || !level().mic) return;
-  // pop the highest matching balloon - the one about to escape
-  let best = null, top = Infinity;
-  for(const el of field.children){
-    if(el.dataset.done || el.dataset.vowel !== v) continue;
-    const t = el.getBoundingClientRect().top;
-    if(t < top){ top = t; best = el; }
+  if(!running || !level().mic){ $('heard').textContent = glyphOf(v); return; }
+
+  // Judge ONLY the target balloon. Searching every balloon for a match meant
+  // that with 3 vowels mixed on screen, almost any sound found something to pop
+  // - about an 80% false-pop rate with four balloons up, which is what it felt
+  // like: "anything I say pops something".
+  const target = currentTarget();
+  if(!target) return;
+  const need = target.dataset.vowel;
+  $('heard').innerHTML = v
+    ? `${glyphOf(v)}<span class="vs">${v === need ? '✓' : '→ ' + glyphOf(need)}</span>`
+    : `<span class="no">unclear</span>`;
+  if(v && v === need){
+    target.querySelector('.balloon').click();
+  } else if(v){
+    target.classList.add('wrong');                 // say it again, no penalty
+    setTimeout(() => target.classList.remove('wrong'), 450);
   }
-  if(best) best.querySelector('.balloon').click();
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -485,6 +517,21 @@ async function calibrate(){
       const m = new Float32Array(NBANDS);
       for(const t of takes[k]) for(let i = 0; i < NBANDS; i++) m[i] += t[i]/takes[k].length;
       centroids[k] = m;
+    }
+    // Separation check. Weak calibration is indistinguishable from a broken
+    // mic once you are playing, so say so now rather than let them wonder.
+    const dist = (a,b) => { let t=0; for(let i=0;i<NBANDS;i++){const d=a[i]-b[i]; t+=d*d;} return Math.sqrt(t); };
+    const keys = Object.keys(centroids);
+    let between = Infinity, within = 0;
+    for(let i=0;i<keys.length;i++){
+      for(let j=i+1;j<keys.length;j++) between = Math.min(between, dist(centroids[keys[i]], centroids[keys[j]]));
+      for(const t of takes[keys[i]]) within = Math.max(within, dist(t, centroids[keys[i]]));
+    }
+    const ratio = between / (within || 1e-9);
+    if(ratio < 1.3){
+      alert(`Calibration looks weak (separation ${ratio.toFixed(1)}, want 1.3+).\n\n`
+          + `The three vowels did not come out distinct. Try again: somewhere quiet, `
+          + `close to the laptop, and exaggerate the difference - baaa, beee, booo.`);
     }
     try {
       localStorage.setItem('bq_centroids', JSON.stringify(
