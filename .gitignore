@@ -7,3 +7,7 @@ vosk-model-*.zip
 # Student voice recordings. This repo is PUBLIC - these must never be pushed.
 clips/
 *.wav
+
+# local python env
+.venv/
+vowels/
