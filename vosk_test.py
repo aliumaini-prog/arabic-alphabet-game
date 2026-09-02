@@ -271,7 +271,11 @@ def formants(path):
     # Absolute gate, not relative: a vowel held for the whole clip has no quiet
     # part to compare against, so "N times above this clip's floor" rejects
     # exactly the cleanest recordings.
-    if np.sqrt(frames[best]) < 100:                # nothing louder than noise
+    # Measured on real sessions: clips whose best window sits under ~300 RMS
+    # give formants that are simply wrong (/u/ came back at F2 1448 instead of
+    # ~900). Above it, the vowel triangle lands on textbook values. Rejecting
+    # loudly beats averaging in noise.
+    if np.sqrt(frames[best]) < 300:
         return None
     x = x[best * hop: best * hop + win]
     x = np.append(x[0], x[1:] - 0.97 * x[:-1])      # pre-emphasis
@@ -310,7 +314,9 @@ def vowels_cmd(record_first, reps, folder=None):
         vdir.mkdir(exist_ok=True)
         n = len(VCONS) * len(VOWELS) * reps
         print(f"{n} clips: {len(VCONS)} letters x 3 vowels x {reps}.")
-        print("3s per clip. Press enter FIRST, then say it - hold the vowel.\n")
+        print("3s per clip. Press enter FIRST, then say it - hold the vowel.")
+        print("Sit CLOSE to the laptop, about a hand's width. Quiet clips\n"
+              "produce confident wrong answers, so it will make you redo them.\n")
         for rep in range(reps):
             for c in VCONS:
                 for name, mark, _ in VOWELS:
@@ -322,9 +328,10 @@ def vowels_cmd(record_first, reps, folder=None):
                         peak = int(np.abs(x).max())
                         # Tell them NOW. Discovering silence after 45 clips is
                         # how a whole session gets wasted.
-                        if peak < 500:
-                            r = input(f"      only peak {peak} - too quiet. "
-                                      f"enter to redo, 's' to keep anyway: ")
+                        if peak < 2000:
+                            r = input(f"      peak {peak} - too quiet, formants "
+                                      f"will be wrong. Get closer to the laptop.\n"
+                                      f"      enter to redo, 's' to keep anyway: ")
                             if r.strip().lower() != 's':
                                 continue
                         else:
