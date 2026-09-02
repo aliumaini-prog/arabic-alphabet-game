@@ -260,9 +260,20 @@ def formants(path):
         x = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(float)
     if len(x) < sr // 4:
         return None
-    x = x[len(x) // 4: 3 * len(x) // 4]            # middle 50%, skip onset/release
-    if np.max(np.abs(x)) < 200:                     # essentially silence
+    # Find the loudest sustained 300ms rather than assuming the vowel sits in the
+    # middle. People speak late after a prompt; a fixed centre window lands on
+    # silence or the consonant release and returns confident nonsense.
+    win, hop = int(0.30 * sr), int(0.05 * sr)
+    frames = [(x[i:i + win] ** 2).mean() for i in range(0, max(1, len(x) - win), hop)]
+    if not frames:
         return None
+    best = int(np.argmax(frames))
+    # Absolute gate, not relative: a vowel held for the whole clip has no quiet
+    # part to compare against, so "N times above this clip's floor" rejects
+    # exactly the cleanest recordings.
+    if np.sqrt(frames[best]) < 100:                # nothing louder than noise
+        return None
+    x = x[best * hop: best * hop + win]
     x = np.append(x[0], x[1:] - 0.97 * x[:-1])      # pre-emphasis
     x = x * np.hamming(len(x))
     a = _lpc(x, 2 + sr // 1000)
@@ -298,13 +309,27 @@ def vowels_cmd(record_first, reps, folder=None):
             die("needs sounddevice + numpy:  pip install sounddevice")
         vdir.mkdir(exist_ok=True)
         n = len(VCONS) * len(VOWELS) * reps
-        print(f"{n} clips: {len(VCONS)} letters x 3 vowels x {reps}. Enter before each.\n")
+        print(f"{n} clips: {len(VCONS)} letters x 3 vowels x {reps}.")
+        print("3s per clip. Press enter FIRST, then say it - hold the vowel.\n")
         for rep in range(reps):
             for c in VCONS:
                 for name, mark, _ in VOWELS:
-                    input(f"  say:  {c + mark}   ({name}, take {rep+1})  (enter) ")
-                    au = sd.rec(int(1.5 * SR), samplerate=SR, channels=1, dtype='int16')
-                    sd.wait()
+                    while True:
+                        input(f"  {c + mark}  ({name}, take {rep+1}) - enter, then say it: ")
+                        au = sd.rec(int(3.0 * SR), samplerate=SR, channels=1, dtype='int16')
+                        sd.wait()
+                        x = au.flatten().astype(float)
+                        peak = int(np.abs(x).max())
+                        # Tell them NOW. Discovering silence after 45 clips is
+                        # how a whole session gets wasted.
+                        if peak < 500:
+                            r = input(f"      only peak {peak} - too quiet. "
+                                      f"enter to redo, 's' to keep anyway: ")
+                            if r.strip().lower() != 's':
+                                continue
+                        else:
+                            print(f"      ok (peak {peak})")
+                        break
                     with wave.open(str(vdir / f"{ord(c):04x}_{name}_{rep}.wav"), 'wb') as w:
                         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
                         w.writeframes(au.tobytes())
@@ -319,6 +344,10 @@ def vowels_cmd(record_first, reps, folder=None):
         if F:
             pts[parts[1]].append((F, chr(int(parts[0], 16))))
     total = sum(len(v) for v in pts.values())
+    seen_files = len(list(vdir.glob('*.wav')))
+    if total < seen_files:
+        print(f"  NOTE: {seen_files - total} of {seen_files} clips had no usable "
+              f"voiced segment (too quiet, or nothing said in the window).\n")
     if total < 6:
         die(f"only {total} usable clips in {vdir}/ - run:  vosk_test.py vowels --record")
 
@@ -341,6 +370,18 @@ def vowels_cmd(record_first, reps, folder=None):
     pct = 100 * hits // len(flat)
     print(f"\n  leave-one-out vowel identification: {hits}/{len(flat)} = {pct}%")
     print("  (chance is 33%)")
+
+    # Refuse to draw a conclusion from a bad recording session. A low score on
+    # six surviving clips says nothing about vowels and everything about the mic.
+    if seen_files and total < 0.7 * seen_files:
+        print(f"\n  NO VERDICT: only {total} of {seen_files} clips were usable.")
+        print("  This measures the recording, not the vowels. Re-record: press")
+        print("  enter FIRST, wait for the prompt, then say it clearly and hold")
+        print("  the vowel for a second. Watch for the 'ok (peak ...)' line.")
+        return
+    if len(flat) < 15:
+        print(f"\n  NO VERDICT: {len(flat)} clips is too few to trust. Record more.")
+        return
     if pct >= 85:
         print("\n  Zabar/zer/pesh ARE separable in these voices. The half that ASR")
         print("  throws away is recoverable with no model at all.")
