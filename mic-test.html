@@ -51,7 +51,7 @@
 
 <h2>2 · Speech recognition (Tier 3) — the real test</h2>
 <div class="card">
-  <p class="sub" style="margin:0 0 10px">24 items, ordered easiest to hardest: letter names first (real words, should work), then bare harakat and joins (non-words, expected to struggle). Have your student say each one. Record what comes back.</p>
+  <p class="sub" style="margin:0 0 10px">24 items, ordered easiest to hardest: letter names first (real words, should work), then bare harakat and joins (non-words, expected to struggle). Press <b>Start</b> (or tap <b>Space</b>) for each item in turn, and have your student say it.</p>
   <div class="glyph" id="glyph">—</div>
   <div class="expect" id="expect">press Start</div>
   <div class="row">
@@ -118,24 +118,33 @@ function show(){
   expect.innerHTML=`say: <bdi>“${t.expect}”</bdi> · ${i+1} of ${TESTS.length}`;  // bdi: expect is RTL
 }
 
+let busy=false, errStreak=0;
+
 function listen(){
+  if(busy || i<0 || i>=TESTS.length) return;      // never run two recognisers at once
   const t=TESTS[i];
   const r=new SR();
   r.lang='ar-SA'; r.continuous=false; r.interimResults=false; r.maxAlternatives=5;
-  recBtn.disabled=true; recBtn.textContent='listening…';
+  busy=true; recBtn.disabled=true; recBtn.textContent='listening…';
+  let got=false;                                   // did onresult/onerror already record?
   r.onresult = e => {
+    got=true;
     const alts=[...e.results[0]].map(a=>a.transcript.trim());
     const conf=e.results[0][0].confidence;
     const hit = alts.some(a => strip(a)===strip(t.expect) || strip(a).includes(strip(t.expect)));
     record(t, alts[0], alts.slice(1), conf, hit?'yes':'no');
   };
-  r.onerror = e => record(t, '—', [], null, e.error==='no-speech' ? 'nothing' : e.error);
-  r.onend = () => { recBtn.disabled=false; recBtn.textContent='Start'; };
+  r.onerror = e => { got=true; record(t,'—',[],null, e.error==='no-speech'?'nothing':e.error); };
+  r.onend = () => {
+    busy=false; recBtn.disabled=false; recBtn.textContent='Start';
+    if(!got) record(t,'—',[],null,'nothing');   // Chrome can end with neither event
+  };
   r.start();
 }
 
 function record(t, heard, alts, conf, verdict){
   results.push({t,heard,alts,conf,verdict});
+  errStreak = (verdict==='yes'||verdict==='no') ? 0 : errStreak+1;
   const cls = verdict==='yes'?'y':verdict==='no'?'n':'q';
   tbl.tBodies[0].insertAdjacentHTML('beforeend',
     `<tr><td class="g">${t.show}</td><td class="g">${t.expect}</td><td class="g">${heard}</td>`+
@@ -149,7 +158,14 @@ function next(){
   i++;
   if(i>=TESTS.length){ finish(); return; }
   show();
-  if(i>0) setTimeout(listen,450);   // small gap so the child can read the next one
+  // Deliberately does NOT auto-start the next item. Auto-chaining turned a single
+  // instant error (network/aborted) into a runaway loop that burned through every
+  // remaining item in seconds. Advancing is manual now: Start, or Space.
+  if(errStreak>=3){
+    expect.innerHTML = `<b style="color:#c11">Stopped after ${errStreak} failures in a row.</b> `+
+                       `Check mic permission and connection, then press Start.`;
+    errStreak=0;
+  }
 }
 
 function finish(){
@@ -165,8 +181,11 @@ function finish(){
 }
 
 recBtn.onclick  = () => { if(i<0){ i=0; show(); } listen(); };
+addEventListener('keydown', e => {              // Space advances, so you aren't clicking 24 times
+  if(e.code==='Space' && !recBtn.disabled){ e.preventDefault(); recBtn.onclick(); }
+});
 skipBtn.onclick = () => { if(i>=0 && i<TESTS.length) record(TESTS[i],'—',[],null,'skipped'); };
-resetBtn.onclick= () => { i=-1; results=[]; tbl.tBodies[0].innerHTML=''; tbl.hidden=true;
+resetBtn.onclick= () => { i=-1; results=[]; errStreak=0; busy=false; tbl.tBodies[0].innerHTML=''; tbl.hidden=true;
                           summary.hidden=true; glyph.textContent='—'; expect.textContent='press Start';
                           recBtn.disabled=false; recBtn.textContent='Start'; };
 </script>
