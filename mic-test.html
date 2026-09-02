@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mic diagnostic — Balloon Qaida</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#123;
+       max-width:940px;margin:0 auto;padding:24px 20px 60px}
+  h1{font-size:20px;margin-bottom:4px} h2{font-size:14px;margin:26px 0 8px;color:#0d2a3d}
+  p.sub{color:#567;margin-bottom:18px;font-size:13px}
+  .card{border:1px solid #dde5ec;border-radius:12px;padding:18px;margin-bottom:18px;background:#fbfdff}
+  .glyph{font-family:"Geeza Pro","Al Bayan",serif;font-size:64px;direction:rtl;line-height:1.3;text-align:center;padding:6px 0}
+  .expect{text-align:center;color:#678;font-size:13px;margin-bottom:12px}
+  button{font:inherit;font-weight:600;border:0;border-radius:9px;padding:10px 18px;background:#2fa8e0;color:#fff;cursor:pointer}
+  button:disabled{background:#9ab;cursor:default} button.ghost{background:#20455c}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+  #meter{height:16px;background:#e6eef4;border-radius:8px;overflow:hidden;margin:14px 0 6px}
+  #bar{height:100%;width:0;background:linear-gradient(90deg,#7ee08a,#f3e14f,#ff9b9b);transition:width .05s}
+  #vad{text-align:center;font-weight:700;font-size:13px;color:#9ab}
+  #vad.on{color:#0a7a2f}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid #e8eef3;vertical-align:top}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#678}
+  td.g{font-family:"Geeza Pro","Al Bayan",serif;font-size:24px;direction:rtl;white-space:nowrap}
+  .y{color:#0a7a2f;font-weight:700} .n{color:#c11;font-weight:700} .q{color:#b80;font-weight:700}
+  .alts{color:#789;font-size:12px}
+  #summary{font-weight:700;margin-top:14px;padding:12px;border-radius:9px;background:#eef6fc}
+  .warn{background:#fff6e6;border:1px solid #f0d9a8;border-radius:9px;padding:12px;font-size:13px;margin-bottom:18px}
+</style>
+</head>
+<body>
+
+<h1>Mic diagnostic</h1>
+<p class="sub">Throwaway spike. Answers one question: <b>does browser speech recognition actually work on Qaida content, with your students' voices?</b> Delete this file once you have the answer.</p>
+
+<div class="warn">
+  <b>Before you start.</b> Use <b>Chrome</b> (Safari's support is unreliable). The page must be on
+  <b>https</b> or localhost or the mic is blocked. Section&nbsp;2 sends audio to <b>Google's servers</b> for
+  transcription — section&nbsp;1 does not, it never leaves this device.
+</div>
+
+<h2>1 · Voice trigger (Tier 1) — no recognition, fully offline</h2>
+<div class="card">
+  <p class="sub" style="margin:0 0 10px">This is the cheap option: pop the balloon when the child <i>makes a sound</i>, without judging what they said. Speak and watch — does this feel responsive enough to drive the game?</p>
+  <div class="row"><button id="vadBtn">Start listening</button></div>
+  <div id="meter"><div id="bar"></div></div>
+  <div id="vad">silent</div>
+</div>
+
+<h2>2 · Speech recognition (Tier 3) — the real test</h2>
+<div class="card">
+  <p class="sub" style="margin:0 0 10px">24 items, ordered easiest to hardest: letter names first (real words, should work), then bare harakat and joins (non-words, expected to struggle). Have your student say each one. Record what comes back.</p>
+  <div class="glyph" id="glyph">—</div>
+  <div class="expect" id="expect">press Start</div>
+  <div class="row">
+    <button id="recBtn">Start</button>
+    <button id="skipBtn" class="ghost">Skip</button>
+    <button id="resetBtn" class="ghost">Reset</button>
+  </div>
+  <div id="summary" hidden></div>
+  <table id="tbl" hidden>
+    <thead><tr><th>Shown</th><th>Expected</th><th>Heard</th><th>Other guesses</th><th>Conf.</th><th>Match</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+/* ---------- 1. VAD: mic loudness only, nothing leaves the device ---------- */
+let vadOn=false, vadStream;
+document.getElementById('vadBtn').onclick = async function(){
+  if(vadOn){ vadStream.getTracks().forEach(t=>t.stop()); vadOn=false;
+             this.textContent='Start listening'; bar.style.width=0; vad.textContent='silent'; vad.className=''; return; }
+  try{
+    vadStream = await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(e){ vad.textContent='mic blocked: '+e.name; return; }
+  vadOn=true; this.textContent='Stop';
+  const ac=new (window.AudioContext||window.webkitAudioContext)();
+  const an=ac.createAnalyser(); an.fftSize=1024;
+  ac.createMediaStreamSource(vadStream).connect(an);
+  const buf=new Float32Array(an.fftSize);
+  const THRESHOLD=0.035;              // tune this: higher = must speak louder
+  (function tick(){
+    if(!vadOn) return;
+    an.getFloatTimeDomainData(buf);
+    let s=0; for(const v of buf) s+=v*v;
+    const rms=Math.sqrt(s/buf.length);
+    bar.style.width=Math.min(100,rms*600)+'%';
+    const on=rms>THRESHOLD;
+    vad.textContent = on ? 'SPEECH DETECTED — balloon would pop' : 'silent';
+    vad.className = on ? 'on' : '';
+    requestAnimationFrame(tick);
+  })();
+};
+
+/* ---------- 2. Web Speech API against real Qaida content ---------- */
+// Ordered easiest -> hardest. Letter names are real Arabic words; the rest are not.
+const TESTS=[
+  {show:'ا',expect:'ألف'},   {show:'ب',expect:'باء'},   {show:'ت',expect:'تاء'},   {show:'ح',expect:'حاء'},
+  {show:'ص',expect:'صاد'},   {show:'ع',expect:'عين'},   {show:'ق',expect:'قاف'},   {show:'ه',expect:'هاء'},
+  {show:'كَتَبَ',expect:'كتب'}, {show:'ذَهَبَ',expect:'ذهب'}, {show:'نَصَرَ',expect:'نصر'}, {show:'فَتَحَ',expect:'فتح'},
+  {show:'بَ',expect:'ب'},     {show:'بِ',expect:'ب'},     {show:'بُ',expect:'ب'},     {show:'صَ',expect:'ص'},
+  {show:'حَ',expect:'ح'},     {show:'عَ',expect:'ع'},     {show:'قَ',expect:'ق'},     {show:'بَا',expect:'با'},
+  {show:'بَتَ',expect:'بت'},   {show:'أَشْ',expect:'أش'},   {show:'يَكْتُبُ',expect:'يكتب'}, {show:'مُسْلِمْ',expect:'مسلم'},
+];
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const strip = s => s.replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').trim();
+let i=-1, results=[];
+
+if(!SR){ document.getElementById('recBtn').disabled=true;
+         document.getElementById('expect').textContent='This browser has no SpeechRecognition — use Chrome.'; }
+
+function show(){
+  const t=TESTS[i];
+  glyph.textContent=t.show;
+  expect.textContent=`say: “${t.expect}”   ·   ${i+1} of ${TESTS.length}`;
+}
+
+function listen(){
+  const t=TESTS[i];
+  const r=new SR();
+  r.lang='ar-SA'; r.continuous=false; r.interimResults=false; r.maxAlternatives=5;
+  recBtn.disabled=true; recBtn.textContent='listening…';
+  r.onresult = e => {
+    const alts=[...e.results[0]].map(a=>a.transcript.trim());
+    const conf=e.results[0][0].confidence;
+    const hit = alts.some(a => strip(a)===strip(t.expect) || strip(a).includes(strip(t.expect)));
+    record(t, alts[0], alts.slice(1), conf, hit?'yes':'no');
+  };
+  r.onerror = e => record(t, '—', [], null, e.error==='no-speech' ? 'nothing' : e.error);
+  r.onend = () => { recBtn.disabled=false; recBtn.textContent='Start'; };
+  r.start();
+}
+
+function record(t, heard, alts, conf, verdict){
+  results.push({t,heard,alts,conf,verdict});
+  const cls = verdict==='yes'?'y':verdict==='no'?'n':'q';
+  tbl.tBodies[0].insertAdjacentHTML('beforeend',
+    `<tr><td class="g">${t.show}</td><td class="g">${t.expect}</td><td class="g">${heard}</td>`+
+    `<td class="alts">${alts.join('، ')||'—'}</td><td>${conf==null?'—':conf.toFixed(2)}</td>`+
+    `<td class="${cls}">${verdict}</td></tr>`);
+  tbl.hidden=false;
+  next();
+}
+
+function next(){
+  i++;
+  if(i>=TESTS.length){ finish(); return; }
+  show();
+  if(i>0) setTimeout(listen,450);   // small gap so the child can read the next one
+}
+
+function finish(){
+  const hits=results.filter(r=>r.verdict==='yes').length;
+  const words=results.slice(0,12), nonwords=results.slice(12);
+  const pct=a=>a.length?Math.round(100*a.filter(r=>r.verdict==='yes').length/a.length):0;
+  glyph.textContent='✓'; expect.textContent='done';
+  summary.hidden=false;
+  summary.innerHTML=`Overall ${hits}/${results.length} (${pct(results)}%) &nbsp;·&nbsp; `+
+    `real words: <b>${pct(words)}%</b> &nbsp;·&nbsp; non-words (levels 2–9): <b>${pct(nonwords)}%</b><br>`+
+    `<span style="font-weight:400;font-size:13px">If non-words score under ~70%, tier 3 will frustrate students — go with tiers 1+2 instead.</span>`;
+  recBtn.disabled=true;
+}
+
+recBtn.onclick  = () => { if(i<0){ i=0; show(); } listen(); };
+skipBtn.onclick = () => { if(i>=0 && i<TESTS.length) record(TESTS[i],'—',[],null,'skipped'); };
+resetBtn.onclick= () => { i=-1; results=[]; tbl.tBodies[0].innerHTML=''; tbl.hidden=true;
+                          summary.hidden=true; glyph.textContent='—'; expect.textContent='press Start';
+                          recBtn.disabled=false; recBtn.textContent='Start'; };
+</script>
+</body>
+</html>
