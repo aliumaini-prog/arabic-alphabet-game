@@ -18,8 +18,24 @@ the top and it counts as a miss.
 
 1. Huroof (letter names)
 2. Zabar (Fatha) · 3. Zer (Kasra) · 4. Pesh (Damma)
-5. Tanween · 6. Jazm (Sukoon) · 7. Tashdeed (Shadda) · 8. Madd
-9. Two-letter joins · 10. Three-letter joins · 11. Four-letter joins
+5. **Mixed harakat** — zabar/zer/pesh interleaved. The only level with mic auto-pop.
+6. Tanween · 7. Jazm (Sukoon) · 8. Tashdeed (Shadda) · 9. Madd
+10. Two-letter joins · 11. Three-letter joins · 12. Four-letter joins
+
+## Mic auto-pop (level 5 only)
+
+Turn on **Mic**, say the vowel, and the balloon pops by itself. It calibrates to
+whoever is speaking first — six prompts, hands-free — so it works for a child's
+voice as well as an adult's. Audio never leaves the device; there is no model and
+no network call, just an FFT.
+
+It judges the **vowel**, not the letter. That is why it runs on level 5 and
+nowhere else: every other level has a single vowel throughout, so listening for
+one would pop any balloon regardless of the letter shown. It also cannot catch a
+wrong consonant — a child saying "tu" at بُ will pop it.
+
+Requires **https** (or localhost), so use the GitHub Pages link, not a local file.
+Recalibrate for a new student by clicking Mic while it is already on.
 
 ## Editing the content
 

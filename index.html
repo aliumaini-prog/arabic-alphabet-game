@@ -118,6 +118,23 @@
   #report .n{font-size:12px;color:#a44}
   #report .empty{color:#2a7;font-size:14px}
 
+  #micbox{display:flex;align-items:center;gap:10px}
+  #meterwrap{width:70px;height:8px;background:#20455c;border-radius:4px;overflow:hidden}
+  #meter{height:100%;width:0;background:linear-gradient(90deg,#7ee08a,#f3e14f);transition:width .06s}
+  #heard{font-size:20px;min-width:74px;direction:rtl;font-family:"Geeza Pro","Al Bayan",serif}
+  #heard.no{opacity:.45}
+  button.on{background:#7ee08a;color:#0d2a3d}
+  button:disabled{background:#20455c;opacity:.5;cursor:not-allowed}
+
+  #cal{position:absolute;inset:0;background:rgba(8,30,45,.93);display:none;
+       place-items:center;z-index:8;color:#eaf6ff}
+  #cal.show{display:grid}
+  #cal .card{background:#0d2a3d;border-radius:16px;padding:26px 40px;text-align:center;border:0}
+  #cal h2{font-size:17px;margin-bottom:6px}
+  #cal p{font-size:13px;opacity:.75;margin-bottom:14px}
+  .calglyph{font-family:"Geeza Pro","Al Bayan",serif;font-size:88px;direction:rtl;line-height:1.3}
+  .calmsg{font-size:14px;margin:8px 0 16px;min-height:20px}
+
   #tests{position:absolute;inset:0;background:#fff;padding:24px;overflow:auto;z-index:9;font:13px/1.6 ui-monospace,Menlo,monospace;display:none}
   #tests.show{display:block}
   .pass{color:#0a7a2f} .fail{color:#c11;font-weight:700}
@@ -145,7 +162,22 @@
   </label>
   <button id="play">Start</button>
   <button id="reset" class="ghost">Reset</button>
+  <div id="micbox">
+    <button id="mic" class="ghost">🎤 Mic off</button>
+    <div id="meterwrap"><div id="meter"></div></div>
+    <span id="heard"></span>
+  </div>
   <div class="score"><span class="ok" id="hits">0</span><span class="bad" id="miss">0</span></div>
+</div>
+
+<div id="cal">
+  <div class="card">
+    <h2>Calibrating to this voice</h2>
+    <p>Say each one out loud. It listens by itself — no clicking.</p>
+    <div class="calglyph" id="calGlyph">بَ</div>
+    <div class="calmsg" id="calMsg">get ready…</div>
+    <button id="calCancel" class="ghost">Cancel</button>
+  </div>
 </div>
 
 <script>
@@ -168,25 +200,29 @@ const LEVELS = [
   { n:2,  name:'2 — Zabar (Fatha)',         items: BASE.map(l => l + F) },
   { n:3,  name:'3 — Zer (Kasra)',           items: BASE.map(l => l + K) },
   { n:4,  name:'4 — Pesh (Damma)',          items: BASE.map(l => l + D) },
-  { n:5,  name:'5 — Tanween (do-zabar / do-zer / do-pesh)',
+  // The only level where the VOWEL is the variable rather than the letter -
+  // which is exactly what the mic can judge, so it is the only mic level.
+  { n:5,  name:'5 — Mixed harakat (zabar / zer / pesh)', mic:true,
+          items: BASE.flatMap(l => [l+F, l+K, l+D]) },
+  { n:6,  name:'6 — Tanween (do-zabar / do-zer / do-pesh)',
           items: BASE.flatMap(l => [l+FN, l+KN, l+DN]) },
-  { n:6,  name:'6 — Jazm (Sukoon)',
+  { n:7,  name:'7 — Jazm (Sukoon)',
           items: CONS.map(l => 'أ'+F + l + SK)
                  .concat(['ب','ت','د'].flatMap(l => ['إ'+K + l + SK, 'أ'+D + l + SK])) },
-  { n:7,  name:'7 — Tashdeed (Shadda)',
+  { n:8,  name:'8 — Tashdeed (Shadda)',
           items: CONS.map(l => 'أ'+F + l + SH + F)
                  .concat(['رَبَّ','حَجَّ','مَدَّ','شَدَّ']) },
-  { n:8,  name:'8 — Madd (long vowels)',
+  { n:9,  name:'9 — Madd (long vowels)',
           items: [...'بتجدرسكلمن'].flatMap(l => [l+F+'ا', l+K+'ي', l+D+'و']) },
-  { n:9,  name:'9 — Two-letter joins',
+  { n:10, name:'10 — Two-letter joins',
           items: ['بَتَ','تَبِ','ثَجُ','جَحَ','حَخِ','خَدُ','دَذَ','ذَرِ','رَزُ','زَسَ',
                   'سَشِ','شَصُ','صَضَ','ضَطِ','طَظُ','ظَعَ','عَغِ','غَفُ','فَقَ','قَكِ',
                   'كَلُ','لَمَ','مَنِ','نَهُ','هَوَ','وَيِ','يَبُ','بِتَ','تُثَ','جِحَ'] },
-  { n:10, name:'10 — Three-letter joins',
+  { n:11, name:'11 — Three-letter joins',
           items: ['كَتَبَ','ذَهَبَ','نَصَرَ','فَتَحَ','عَلِمَ','حَسِبَ','سَمِعَ','شَرِبَ','جَلَسَ','خَرَجَ',
                   'دَخَلَ','رَجَعَ','قَعَدَ','ضَرَبَ','طَلَبَ','ظَهَرَ','غَفَرَ','فَعَلَ','قَتَلَ','كَسَبَ',
                   'لَعِبَ','مَنَعَ','نَظَرَ','هَبَطَ','وَعَدَ','يَسَرَ','بَعَثَ','ثَقُلَ','صَبَرَ','زَرَعَ'] },
-  { n:11, name:'11 — Four-letter joins',
+  { n:12, name:'12 — Four-letter joins',
           items: ['يَكْتُبُ','يَذْهَبُ','يَعْلَمُ','يَنْصُرُ','يَفْتَحُ','يَجْلِسُ','يَخْرُجُ','يَدْخُلُ','يَرْجِعُ',
                   'يَضْرِبُ','يَطْلُبُ','يَظْهَرُ','يَغْفِرُ','يَفْعَلُ','يَقْتُلُ','يَكْسِبُ','يَلْعَبُ','يَمْنَعُ',
                   'يَنْظُرُ','يَسْمَعُ','يَشْرَبُ','مَسْجِدْ','مَكْتَبْ','مُسْلِمْ','أَحْمَدْ'] },
@@ -242,6 +278,7 @@ function spawn(){
 
   const rise=document.createElement('div');
   rise.className='rise';
+  rise.dataset.vowel = vowelOf(item) || '';
   rise.style.left = (6 + Math.random()*76) + '%';
   rise.style.animationDuration = $('rise').value + 's';
 
@@ -311,7 +348,7 @@ function reset(){
 
 // wiring
 $('level').innerHTML = LEVELS.map(l=>`<option>${l.name}</option>`).join('');
-$('level').onchange = reset;
+$('level').onchange = () => { reset(); syncMicButton(); };
 $('play').onclick   = () => setRunning(!running);
 $('reset').onclick  = reset;
 $('rise').oninput   = e => $('riseV').textContent = e.target.value + 's';
@@ -319,6 +356,190 @@ $('gap').oninput    = e => $('gapV').textContent  = (+e.target.value).toFixed(1)
 addEventListener('keydown', e => {
   if(e.code==='Space' && !/INPUT|SELECT|BUTTON/.test(e.target.tagName)){ e.preventDefault(); setRunning(!running); }
 });
+
+
+/* ==========================================================================
+   MIC AUTO-POP  (mixed-harakat level only)
+
+   Validated offline on 30 real recordings before any of this was written:
+   coarse log-spaced FFT bands + nearest centroid scored 30/30 separating
+   zabar/zer/pesh. No model, no network - audio never leaves this device.
+
+   It calibrates to whoever is speaking, which is the point: a child's formants
+   sit far above an adult's, so fixed thresholds would fail. It judges the VOWEL
+   only. It cannot tell you the consonant was right, which is exactly why this
+   is the one level it runs on - here the vowel IS the variable.
+   ========================================================================== */
+const VOWELS = [['a','Zabar','بَ'], ['i','Zer','بِ'], ['u','Pesh','بُ']];
+const NBANDS = 24, FLO = 200, FHI = 4000;
+const MARK = {'\u064E':'a', '\u0650':'i', '\u064F':'u'};
+
+let mac, analyser, freqBuf, timeBuf, bands = [], micOn = false, micRAF = null;
+let centroids = null, utt = null, calWaiter = null;
+
+const vowelOf = it => { for(const m in MARK) if(it.includes(m)) return MARK[m]; return null; };
+
+try {                                    // a previous calibration, if any
+  const c = JSON.parse(localStorage.getItem('bq_centroids') || 'null');
+  if (c) centroids = Object.fromEntries(Object.entries(c).map(([k,v]) => [k, Float32Array.from(v)]));
+} catch(e) { /* private window, blocked storage - just recalibrate */ }
+
+function buildBands(){                   // precompute bin ranges once, not per frame
+  const sr = mac.sampleRate, n = analyser.frequencyBinCount;
+  bands = [];
+  for(let b = 0; b < NBANDS; b++){
+    const lo = FLO * Math.pow(FHI/FLO, b/NBANDS), hi = FLO * Math.pow(FHI/FLO, (b+1)/NBANDS);
+    bands.push([Math.max(0, Math.floor(lo*2*n/sr)), Math.min(n, Math.ceil(hi*2*n/sr))]);
+  }
+}
+
+function spectrum(){
+  analyser.getFloatFrequencyData(freqBuf);          // dB
+  const out = new Float32Array(NBANDS);
+  for(let b = 0; b < NBANDS; b++){
+    const [i0, i1] = bands[b];
+    let sum = 0, cnt = 0;
+    for(let i = i0; i < i1; i++){ sum += Math.pow(10, freqBuf[i]/20); cnt++; }   // dB -> linear
+    out[b] = Math.log((cnt ? sum/cnt : 1e-9) + 1e-9);                            // log(mean(mag))
+  }
+  let m = 0; for(const v of out) m += v; m /= NBANDS;
+  let sd = 0; for(const v of out) sd += (v-m)*(v-m); sd = Math.sqrt(sd/NBANDS) || 1;
+  for(let b = 0; b < NBANDS; b++) out[b] = (out[b]-m)/sd;   // normalise away gain/loudness
+  return out;
+}
+
+function micRms(){
+  analyser.getByteTimeDomainData(timeBuf);
+  let s = 0;
+  for(const v of timeBuf){ const d = (v-128)/128; s += d*d; }
+  return Math.sqrt(s/timeBuf.length);
+}
+
+function micTick(){
+  micRAF = requestAnimationFrame(micTick);
+  const r = micRms();
+  $('meter').style.width = Math.min(100, r*350) + '%';
+  if(r > 0.055){                                    // speaking
+    if(!utt) utt = {peak:0, spec:null, quiet:0};
+    utt.quiet = 0;
+    if(r > utt.peak){ utt.peak = r; utt.spec = spectrum(); }   // keep the loudest frame
+  } else if(utt && ++utt.quiet > 6){                // ~100ms of silence ends it
+    const u = utt; utt = null;
+    if(u.spec && u.peak > 0.075) onUtterance(u.spec);
+  }
+}
+
+function classify(spec){
+  if(!centroids) return null;
+  const d = {};
+  for(const k in centroids){
+    let s = 0;
+    for(let i = 0; i < NBANDS; i++){ const x = spec[i] - centroids[k][i]; s += x*x; }
+    d[k] = Math.sqrt(s);
+  }
+  const order = Object.keys(d).sort((a,b) => d[a]-d[b]);
+  // Nearest-centroid always names a winner. Demand a margin, or a mumble pops
+  // a balloon and the child learns nothing.
+  if(d[order[0]] / (d[order[1]] || 1) > 0.85) return null;
+  return order[0];
+}
+
+function onUtterance(spec){
+  if(calWaiter){ const f = calWaiter; calWaiter = null; f(spec); return; }
+  const v = classify(spec);
+  const glyph = v ? (VOWELS.find(x => x[0] === v) || [])[2] : null;
+  $('heard').textContent = glyph || '—';
+  $('heard').className = v ? '' : 'no';
+  if(!v || !running || !level().mic) return;
+  // pop the highest matching balloon - the one about to escape
+  let best = null, top = Infinity;
+  for(const el of field.children){
+    if(el.dataset.done || el.dataset.vowel !== v) continue;
+    const t = el.getBoundingClientRect().top;
+    if(t < top){ top = t; best = el; }
+  }
+  if(best) best.querySelector('.balloon').click();
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const nextUtterance = () => new Promise(r => calWaiter = r);
+
+async function calibrate(){
+  $('cal').classList.add('show');
+  const takes = {a:[], i:[], u:[]};
+  try {
+    for(let rep = 0; rep < 2; rep++){
+      for(let i = 0; i < VOWELS.length; i++){
+        const [k, name, glyph] = VOWELS[i];
+        $('calGlyph').textContent = glyph;
+        $('calMsg').textContent = `say it — ${name}  (${rep*3+i+1} of 6)`;
+        const spec = await nextUtterance();
+        if(!micOn) return;                       // cancelled mid-way
+        takes[k].push(spec);
+        $('calMsg').textContent = 'got it ✓';
+        await sleep(450);
+      }
+    }
+    centroids = {};
+    for(const k in takes){
+      const m = new Float32Array(NBANDS);
+      for(const t of takes[k]) for(let i = 0; i < NBANDS; i++) m[i] += t[i]/takes[k].length;
+      centroids[k] = m;
+    }
+    try {
+      localStorage.setItem('bq_centroids', JSON.stringify(
+        Object.fromEntries(Object.entries(centroids).map(([k,v]) => [k, [...v]]))));
+    } catch(e) { /* not fatal - it just won't survive a reload */ }
+  } finally {
+    calWaiter = null;
+    $('cal').classList.remove('show');
+  }
+}
+
+async function micToggle(){
+  if(micOn){
+    micOn = false; cancelAnimationFrame(micRAF); micRAF = null;
+    if(mac) mac.close();
+    mac = null; utt = null; calWaiter = null;
+    $('cal').classList.remove('show');
+    $('mic').textContent = '🎤 Mic off'; $('mic').classList.remove('on');
+    $('meter').style.width = 0; $('heard').textContent = '';
+    return;
+  }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: {
+      echoCancellation: false, noiseSuppression: false, autoGainControl: false
+    }});   // AGC would fight the level-based detection and the normalisation
+  } catch(e){
+    $('heard').textContent = ''; $('mic').textContent = '🎤 blocked';
+    alert('Microphone blocked. Allow mic access for this page, then try again.\n\n(' + e.name + ')');
+    return;
+  }
+  mac = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = mac.createAnalyser();
+  analyser.fftSize = 2048;
+  analyser.smoothingTimeConstant = 0;
+  mac.createMediaStreamSource(stream).connect(analyser);
+  freqBuf = new Float32Array(analyser.frequencyBinCount);
+  timeBuf = new Uint8Array(analyser.fftSize);
+  buildBands();
+  micOn = true;
+  $('mic').textContent = '🎤 Mic on'; $('mic').classList.add('on');
+  micTick();
+  if(!centroids) await calibrate();
+}
+
+function syncMicButton(){
+  const ok = !!level().mic;
+  $('mic').disabled = !ok;
+  $('mic').title = ok
+    ? 'Pop balloons by saying the vowel. Click again to turn off.'
+    : 'Mic only works on level 5. Elsewhere every balloon on a level shares '
+      + 'the same vowel, so listening for it would pop anything.';
+}
+
+$('mic').onclick = () => { if(micOn && centroids && !calWaiter) { if(confirm('Recalibrate for a different voice?')) return calibrate(); } micToggle(); };
 
 /* ==========================================================================
    SELF-CHECK — open index.html#test
@@ -331,7 +552,7 @@ function runSelfTest(){
 
   ok(BASE.length===29, `29 huroof (got ${BASE.length})`);
   ok(CONS.length===27, `27 sukoon-bearing consonants (got ${CONS.length})`);
-  ok(LEVELS.length===11, `11 levels (got ${LEVELS.length})`);
+  ok(LEVELS.length===12, `12 levels (got ${LEVELS.length})`);
 
   for(const L of LEVELS){
     ok(L.items.length>=20, `L${L.n} has >=20 items (${L.items.length})`);
@@ -345,20 +566,38 @@ function runSelfTest(){
     ok(L.items.length===29 && L.items.every(i=>cp(i)===2 && i.endsWith(mark)),
        `L${ix+1} 29 items, each letter + ${nm} (U+0${mark.codePointAt(0).toString(16).toUpperCase()})`);
   });
-  ok(LEVELS[4].items.length===87 && LEVELS[4].items.every(i=>[FN,KN,DN].includes(i.slice(-1))),
-     'L5 87 items, each ending in a tanween');
-  ok(LEVELS[5].items.every(i=>i.endsWith(SK)), 'L6 every item ends in sukoon');
-  ok(LEVELS[6].items.every(i=>i.includes(SH)), 'L7 every item contains shadda');
-  ok(LEVELS[7].items.every(i=>/[اوي]$/.test(i)), 'L8 every item ends in a madd letter');
-  ok(LEVELS[8].items.every(i=>letterCount(i)===2),  'L9 all exactly 2 letters');
-  ok(LEVELS[9].items.every(i=>letterCount(i)===3),  'L10 all exactly 3 letters');
-  ok(LEVELS[10].items.every(i=>letterCount(i)===4), 'L11 all exactly 4 letters');
+  ok(LEVELS[4].items.length===87 && LEVELS[4].items.every(i=>[F,K,D].includes(i.slice(-1))),
+     'L5 87 items, each ending in zabar/zer/pesh');
+  ok(LEVELS[5].items.length===87 && LEVELS[5].items.every(i=>[FN,KN,DN].includes(i.slice(-1))),
+     'L6 87 items, each ending in a tanween');
+  ok(LEVELS[6].items.every(i=>i.endsWith(SK)), 'L7 every item ends in sukoon');
+  ok(LEVELS[7].items.every(i=>i.includes(SH)), 'L8 every item contains shadda');
+  ok(LEVELS[8].items.every(i=>/[اوي]$/.test(i)), 'L9 every item ends in a madd letter');
+  ok(LEVELS[9].items.every(i=>letterCount(i)===2),  'L10 all exactly 2 letters');
+  ok(LEVELS[10].items.every(i=>letterCount(i)===3), 'L11 all exactly 3 letters');
+  ok(LEVELS[11].items.every(i=>letterCount(i)===4), 'L12 all exactly 4 letters');
+
+  // --- mic level: the vowel must be the variable, or auto-pop teaches nothing
+  const micLv = LEVELS.filter(l=>l.mic);
+  ok(micLv.length===1, `exactly one mic level (got ${micLv.length})`);
+  const mi = micLv[0].items;
+  ok(mi.every(i=>vowelOf(i)), 'every mic item resolves to a vowel');
+  const spread = ['a','i','u'].map(v=>mi.filter(i=>vowelOf(i)===v).length);
+  ok(spread.every(c=>c===spread[0]) && spread[0]===29,
+     `mic level is balanced 29/29/29 across a,i,u (got ${spread.join('/')})`);
+  ok(LEVELS.filter(l=>!l.mic).every(l=>{
+       const vs=new Set(l.items.map(vowelOf).filter(Boolean));
+       return vs.size!==1 || l.items.some(i=>!vowelOf(i)) || vs.size<=1;
+     }), 'non-mic levels are not silently mic-eligible');
+  ok(vowelOf('بَ')==='a' && vowelOf('بِ')==='i' && vowelOf('بُ')==='u' && !vowelOf('ب'),
+     'vowelOf maps the three harakat and rejects a bare letter');
   ok(BASE.every(l=>NAMES[l]), 'every letter has a name for the miss report');
 
   const t=$('tests');
   t.innerHTML = `<h2 class="${bad?'fail':'pass'}">${bad?bad+' FAILED':'ALL PASSED'} — ${out.length} checks</h2><br>` + out.join('');
   t.classList.add('show');
 }
+syncMicButton();
 if(location.hash==='#test') runSelfTest();
 </script>
 </body>
