@@ -115,7 +115,7 @@ if(!SR){ document.getElementById('recBtn').disabled=true;
 function show(){
   const t=TESTS[i];
   glyph.textContent=t.show;
-  expect.textContent=`say: “${t.expect}”   ·   ${i+1} of ${TESTS.length}`;
+  expect.innerHTML=`say: <bdi>“${t.expect}”</bdi> · ${i+1} of ${TESTS.length}`;  // bdi: expect is RTL
 }
 
 function listen(){
