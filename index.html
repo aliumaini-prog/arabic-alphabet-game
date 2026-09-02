@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Balloon Qaida</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:#123; -webkit-user-select:none; user-select:none;
+    display:flex; flex-direction:column;
+    background:#bfe3f7;
+  }
+
+  /* ---------- sky ---------- */
+  #sky{
+    position:relative; flex:1; overflow:hidden;
+    background:
+      radial-gradient(120% 80% at 50% 65%,#f2fbff 0%,#cfeaf9 45%,#9ed3f0 100%);
+  }
+  .cloud{
+    position:absolute; background:#fff; border-radius:50%;
+    box-shadow:0 0 0 rgba(0,0,0,0); opacity:.95;
+    filter:drop-shadow(0 6px 10px rgba(120,170,200,.25));
+  }
+  .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+  .cloud::before{width:65%;height:110%;left:-28%;top:-8%}
+  .cloud::after{width:80%;height:125%;right:-30%;top:-22%}
+  .c1{width:190px;height:74px;left:4%;top:8%}
+  .c2{width:250px;height:88px;right:6%;top:5%}
+  .c3{width:150px;height:60px;left:34%;top:20%;opacity:.7}
+  .c4{width:210px;height:78px;right:26%;top:26%;opacity:.55}
+
+  /* ---------- balloons ---------- */
+  #field{position:absolute;inset:0}
+  #field.paused *{animation-play-state:paused!important}
+
+  .rise{
+    position:absolute; bottom:0;
+    animation:rise linear forwards;
+    will-change:transform;
+  }
+  @keyframes rise{ to{ transform:translateY(calc(-100vh - 46vh)); } }
+
+  .sway{ animation:sway 3.4s ease-in-out infinite alternate; }
+  @keyframes sway{ from{transform:translateX(-14px) rotate(-2.5deg)} to{transform:translateX(14px) rotate(2.5deg)} }
+
+  .balloon{
+    position:relative; cursor:pointer;
+    width:var(--w); height:calc(var(--w) * 1.22);
+    border-radius:50% 50% 50% 50% / 58% 58% 42% 42%;
+    background:
+      radial-gradient(ellipse at 30% 24%, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 42%),
+      radial-gradient(ellipse at 72% 82%, rgba(0,0,0,.14) 0%, rgba(0,0,0,0) 46%),
+      var(--c);
+    display:grid; place-items:center;
+    filter:drop-shadow(0 10px 14px rgba(70,120,150,.28));
+    transition:filter .12s;
+  }
+  .balloon:hover{filter:drop-shadow(0 10px 20px rgba(70,120,150,.5)) brightness(1.04)}
+  /* knot */
+  .balloon::after{
+    content:""; position:absolute; bottom:-9px; left:50%; translate:-50% 0;
+    border:9px solid transparent; border-top-color:var(--c); opacity:.95;
+  }
+  .string{
+    position:absolute; top:calc(var(--w) * 1.22 + 6px); left:50%;
+    width:16px; height:46px; margin-left:-2px;
+    border-left:2px solid rgba(255,255,255,.9);
+    border-bottom:2px solid rgba(255,255,255,.9);
+    border-radius:0 0 0 90%;
+    pointer-events:none;
+  }
+
+  .item{
+    font-family:"Geeza Pro","Al Bayan","Baghdad","Scheherazade New","Traditional Arabic",serif;
+    font-size:calc(var(--w) * var(--fs));
+    line-height:1.35; color:#111; direction:rtl;
+    padding-bottom:.06em; white-space:nowrap; pointer-events:none;
+  }
+
+  .popped{animation:pop .18s ease-out forwards!important}
+  @keyframes pop{ to{ transform:scale(1.55); opacity:0 } }
+
+  /* ---------- controls ---------- */
+  #bar{
+    display:flex; flex-wrap:wrap; gap:14px 18px; align-items:center;
+    padding:10px 16px; background:#0d2a3d; color:#eaf6ff;
+    box-shadow:0 -4px 14px rgba(0,0,0,.18); z-index:5;
+  }
+  #bar label{display:flex;flex-direction:column;gap:3px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;opacity:.85}
+  select,button{font:inherit;border-radius:8px;border:0;padding:7px 12px;cursor:pointer}
+  select{background:#eaf6ff;color:#0d2a3d;min-width:190px}
+  button{background:#2fa8e0;color:#fff;font-weight:600}
+  button:hover{filter:brightness(1.1)}
+  button.ghost{background:#20455c}
+  input[type=range]{width:130px;accent-color:#2fa8e0}
+  .val{font-variant-numeric:tabular-nums;font-size:13px;text-transform:none;opacity:1;font-weight:600}
+  .score{margin-left:auto;display:flex;gap:16px;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+  .ok{color:#7ee08a} .bad{color:#ff9b9b}
+
+  /* ---------- report ---------- */
+  #report{
+    position:absolute; inset:auto 0 0 0; max-height:62%; overflow:auto;
+    background:rgba(255,255,255,.96); padding:16px 20px 20px;
+    border-top:3px solid #2fa8e0; display:none; z-index:4;
+  }
+  #report.show{display:block}
+  #report h2{font-size:15px;margin-bottom:10px;color:#0d2a3d}
+  #report ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none}
+  #report li{
+    background:#fff2f2;border:1px solid #ffd0d0;border-radius:10px;
+    padding:6px 12px;display:flex;align-items:center;gap:8px;
+  }
+  #report .g{font-family:"Geeza Pro","Al Bayan",serif;font-size:26px;direction:rtl}
+  #report .n{font-size:12px;color:#a44}
+  #report .empty{color:#2a7;font-size:14px}
+
+  #tests{position:absolute;inset:0;background:#fff;padding:24px;overflow:auto;z-index:9;font:13px/1.6 ui-monospace,Menlo,monospace;display:none}
+  #tests.show{display:block}
+  .pass{color:#0a7a2f} .fail{color:#c11;font-weight:700}
+</style>
+</head>
+<body>
+
+<div id="sky">
+  <div class="cloud c1"></div><div class="cloud c2"></div>
+  <div class="cloud c3"></div><div class="cloud c4"></div>
+  <div id="field"></div>
+  <div id="report"></div>
+  <div id="tests"></div>
+</div>
+
+<div id="bar">
+  <label>Level
+    <select id="level"></select>
+  </label>
+  <label>Rise time <span class="val" id="riseV">8s</span>
+    <input type="range" id="rise" min="3" max="15" step="1" value="8">
+  </label>
+  <label>Spawn gap <span class="val" id="gapV">3.0s</span>
+    <input type="range" id="gap" min="0.5" max="6" step="0.5" value="3">
+  </label>
+  <button id="play">Start</button>
+  <button id="reset" class="ghost">Reset</button>
+  <div class="score"><span class="ok" id="hits">0</span><span class="bad" id="miss">0</span></div>
+</div>
+
+<script>
+/* ==========================================================================
+   LEVEL CONTENT — edit here. Everything below this block is game plumbing.
+   Each level is { n, name, items:[strings] }.
+   ========================================================================== */
+
+const F='َ', K='ِ', D='ُ',            // zabar, zer, pesh
+      FN='ً', DN='ٌ', KN='ٍ',          // tanween
+      SH='ّ', SK='ْ';                       // tashdeed, jazm
+
+// 29 huroof in Qaida order
+const BASE = [...'ابتثجحخدذرزسشصضطظعغفقكلمنوهءي'];
+// consonants that take a sukoon / follow a madd (excludes alif + hamza)
+const CONS = BASE.filter(l => l !== 'ا' && l !== 'ء');
+
+const LEVELS = [
+  { n:1,  name:'1 — Huroof (letter names)', items: BASE },
+  { n:2,  name:'2 — Zabar (Fatha)',         items: BASE.map(l => l + F) },
+  { n:3,  name:'3 — Zer (Kasra)',           items: BASE.map(l => l + K) },
+  { n:4,  name:'4 — Pesh (Damma)',          items: BASE.map(l => l + D) },
+  { n:5,  name:'5 — Tanween (do-zabar / do-zer / do-pesh)',
+          items: BASE.flatMap(l => [l+FN, l+KN, l+DN]) },
+  { n:6,  name:'6 — Jazm (Sukoon)',
+          items: CONS.map(l => 'أ'+F + l + SK)
+                 .concat(['ب','ت','د'].flatMap(l => ['إ'+K + l + SK, 'أ'+D + l + SK])) },
+  { n:7,  name:'7 — Tashdeed (Shadda)',
+          items: CONS.map(l => 'أ'+F + l + SH + F)
+                 .concat(['رَبَّ','حَجَّ','مَدَّ','شَدَّ']) },
+  { n:8,  name:'8 — Madd (long vowels)',
+          items: [...'بتجدرسكلمن'].flatMap(l => [l+F+'ا', l+K+'ي', l+D+'و']) },
+  { n:9,  name:'9 — Two-letter joins',
+          items: ['بَتَ','تَبِ','ثَجُ','جَحَ','حَخِ','خَدُ','دَذَ','ذَرِ','رَزُ','زَسَ',
+                  'سَشِ','شَصُ','صَضَ','ضَطِ','طَظُ','ظَعَ','عَغِ','غَفُ','فَقَ','قَكِ',
+                  'كَلُ','لَمَ','مَنِ','نَهُ','هَوَ','وَيِ','يَبُ','بِتَ','تُثَ','جِحَ'] },
+  { n:10, name:'10 — Three-letter joins',
+          items: ['كَتَبَ','ذَهَبَ','نَصَرَ','فَتَحَ','عَلِمَ','حَسِبَ','سَمِعَ','شَرِبَ','جَلَسَ','خَرَجَ',
+                  'دَخَلَ','رَجَعَ','قَعَدَ','ضَرَبَ','طَلَبَ','ظَهَرَ','غَفَرَ','فَعَلَ','قَتَلَ','كَسَبَ',
+                  'لَعِبَ','مَنَعَ','نَظَرَ','هَبَطَ','وَعَدَ','يَسَرَ','بَعَثَ','ثَقُلَ','صَبَرَ','زَرَعَ'] },
+  { n:11, name:'11 — Four-letter joins',
+          items: ['يَكْتُبُ','يَذْهَبُ','يَعْلَمُ','يَنْصُرُ','يَفْتَحُ','يَجْلِسُ','يَخْرُجُ','يَدْخُلُ','يَرْجِعُ',
+                  'يَضْرِبُ','يَطْلُبُ','يَظْهَرُ','يَغْفِرُ','يَفْعَلُ','يَقْتُلُ','يَكْسِبُ','يَلْعَبُ','يَمْنَعُ',
+                  'يَنْظُرُ','يَسْمَعُ','يَشْرَبُ','مَسْجِدْ','مَكْتَبْ','مُسْلِمْ','أَحْمَدْ'] },
+];
+
+// used only in the miss report, to name what was missed
+const NAMES = {'ا':'Alif','ب':'Ba','ت':'Ta','ث':'Tha','ج':'Jeem','ح':'Ha (haa)','خ':'Kha',
+  'د':'Dal','ذ':'Dhal','ر':'Ra','ز':'Za','س':'Seen','ش':'Sheen','ص':'Saad','ض':'Daad',
+  'ط':'Toa','ظ':'Zoa','ع':'Ain','غ':'Ghain','ف':'Fa','ق':'Qaf','ك':'Kaf','ل':'Lam',
+  'م':'Meem','ن':'Noon','و':'Waw','ه':'Ha (hay)','ء':'Hamza','ي':'Ya'};
+
+/* ==========================================================================
+   GAME
+   ========================================================================== */
+
+const COLORS = ['#eb8fd4','#a9e05f','#f3e14f','#d9dee4','#8fd0f5','#f7a85c','#c3a6f0','#7fdcc0'];
+const $ = id => document.getElementById(id);
+const field=$('field'), report=$('report');
+
+let hits=0, missed=0, running=false, timer=null, bag=[], missLog=new Map();
+
+const level = () => LEVELS[$('level').selectedIndex];
+
+// Fisher-Yates: deal the whole level before repeating anything
+function nextItem(){
+  if(!bag.length){
+    bag = level().items.slice();
+    for(let i=bag.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [bag[i],bag[j]]=[bag[j],bag[i]]; }
+  }
+  return bag.pop();
+}
+
+// harakat are combining marks — strip them to count actual letters
+const letterCount = s => s.replace(/[ً-ٓ]/g,'').length;
+
+let ac;
+function blip(){
+  try{
+    ac ||= new (window.AudioContext||window.webkitAudioContext)();
+    const t=ac.currentTime, o=ac.createOscillator(), g=ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.frequency.setValueAtTime(760,t); o.frequency.exponentialRampToValueAtTime(170,t+.12);
+    g.gain.setValueAtTime(.22,t);      g.gain.exponentialRampToValueAtTime(.001,t+.15);
+    o.start(t); o.stop(t+.16);
+  }catch(e){/* audio blocked — game still works */}
+}
+
+function spawn(){
+  const item = nextItem();
+  const n = letterCount(item);
+  const w = Math.min(innerWidth*0.42, n>3 ? 230 : n>1 ? 195 : 155);
+  const fs = n>3 ? 0.26 : n>2 ? 0.32 : n>1 ? 0.42 : 0.56;
+
+  const rise=document.createElement('div');
+  rise.className='rise';
+  rise.style.left = (6 + Math.random()*76) + '%';
+  rise.style.animationDuration = $('rise').value + 's';
+
+  const sway=document.createElement('div');
+  sway.className='sway';
+  sway.style.animationDuration = (2.8 + Math.random()*1.6) + 's';
+
+  const b=document.createElement('div');
+  b.className='balloon';
+  b.style.setProperty('--w', w+'px');
+  b.style.setProperty('--fs', fs);
+  b.style.setProperty('--c', COLORS[Math.random()*COLORS.length|0]);
+  b.innerHTML = '<span class="item" lang="ar" dir="rtl"></span><span class="string"></span>';
+  b.querySelector('.item').textContent = item;
+
+  b.addEventListener('click', () => {
+    if(rise.dataset.done) return;
+    rise.dataset.done='1';
+    hits++; $('hits').textContent=hits; blip();
+    b.classList.add('popped');
+    setTimeout(()=>rise.remove(),200);
+  });
+
+  rise.addEventListener('animationend', e => {
+    if(e.animationName!=='rise' || rise.dataset.done) return;   // ignore sway/pop
+    rise.dataset.done='1';
+    missed++; $('miss').textContent=missed;
+    missLog.set(item,(missLog.get(item)||0)+1);
+    rise.remove();
+  });
+
+  sway.appendChild(b); rise.appendChild(sway); field.appendChild(rise);
+}
+
+function loop(){
+  if(!running) return;
+  spawn();
+  timer = setTimeout(loop, $('gap').value*1000);
+}
+
+function setRunning(on){
+  running = on;
+  field.classList.toggle('paused', !on);
+  $('play').textContent = on ? 'Pause' : (field.children.length ? 'Resume' : 'Start');
+  clearTimeout(timer);
+  if(on){ report.classList.remove('show'); loop(); }
+  else showReport();
+}
+
+function showReport(){
+  const rows=[...missLog.entries()].sort((a,b)=>b[1]-a[1]);
+  report.innerHTML = '<h2>Missed — drill these</h2>' + (rows.length
+    ? '<ul>' + rows.map(([it,c]) =>
+        `<li><span class="g">${it}</span><span class="n">${NAMES[it]?NAMES[it]+' · ':''}${c}×</span></li>`
+      ).join('') + '</ul>'
+    : '<p class="empty">Nothing missed yet. ✓</p>');
+  report.classList.add('show');
+}
+
+function reset(){
+  setRunning(false);
+  field.innerHTML=''; bag=[]; missLog.clear();
+  hits=missed=0; $('hits').textContent=0; $('miss').textContent=0;
+  report.classList.remove('show');
+  $('play').textContent='Start';
+}
+
+// wiring
+$('level').innerHTML = LEVELS.map(l=>`<option>${l.name}</option>`).join('');
+$('level').onchange = reset;
+$('play').onclick   = () => setRunning(!running);
+$('reset').onclick  = reset;
+$('rise').oninput   = e => $('riseV').textContent = e.target.value + 's';
+$('gap').oninput    = e => $('gapV').textContent  = (+e.target.value).toFixed(1) + 's';
+addEventListener('keydown', e => {
+  if(e.code==='Space' && !/INPUT|SELECT|BUTTON/.test(e.target.tagName)){ e.preventDefault(); setRunning(!running); }
+});
+
+/* ==========================================================================
+   SELF-CHECK — open index.html#test
+   Guards the thing that silently breaks: wrong combining marks in the data.
+   ========================================================================== */
+function runSelfTest(){
+  const out=[]; let bad=0;
+  const ok=(c,m)=>{ out.push(`<div class="${c?'pass':'fail'}">${c?'PASS':'FAIL'}  ${m}</div>`); if(!c)bad++; };
+  const cp = s => [...s].length;
+
+  ok(BASE.length===29, `29 huroof (got ${BASE.length})`);
+  ok(CONS.length===27, `27 sukoon-bearing consonants (got ${CONS.length})`);
+  ok(LEVELS.length===11, `11 levels (got ${LEVELS.length})`);
+
+  for(const L of LEVELS){
+    ok(L.items.length>=20, `L${L.n} has >=20 items (${L.items.length})`);
+    ok(L.items.every(i=>i && i.trim()), `L${L.n} no empty items`);
+    ok(new Set(L.items).size===L.items.length, `L${L.n} no duplicates`);
+  }
+
+  ok(LEVELS[0].items.every(i=>cp(i)===1), 'L1 items are single codepoints');
+  [[1,F,'zabar'],[2,K,'zer'],[3,D,'pesh']].forEach(([ix,mark,nm])=>{
+    const L=LEVELS[ix];
+    ok(L.items.length===29 && L.items.every(i=>cp(i)===2 && i.endsWith(mark)),
+       `L${ix+1} 29 items, each letter + ${nm} (U+0${mark.codePointAt(0).toString(16).toUpperCase()})`);
+  });
+  ok(LEVELS[4].items.length===87 && LEVELS[4].items.every(i=>[FN,KN,DN].includes(i.slice(-1))),
+     'L5 87 items, each ending in a tanween');
+  ok(LEVELS[5].items.every(i=>i.endsWith(SK)), 'L6 every item ends in sukoon');
+  ok(LEVELS[6].items.every(i=>i.includes(SH)), 'L7 every item contains shadda');
+  ok(LEVELS[7].items.every(i=>/[اوي]$/.test(i)), 'L8 every item ends in a madd letter');
+  ok(LEVELS[8].items.every(i=>letterCount(i)===2),  'L9 all exactly 2 letters');
+  ok(LEVELS[9].items.every(i=>letterCount(i)===3),  'L10 all exactly 3 letters');
+  ok(LEVELS[10].items.every(i=>letterCount(i)===4), 'L11 all exactly 4 letters');
+  ok(BASE.every(l=>NAMES[l]), 'every letter has a name for the miss report');
+
+  const t=$('tests');
+  t.innerHTML = `<h2 class="${bad?'fail':'pass'}">${bad?bad+' FAILED':'ALL PASSED'} — ${out.length} checks</h2><br>` + out.join('');
+  t.classList.add('show');
+}
+if(location.hash==='#test') runSelfTest();
+</script>
+</body>
+</html>
