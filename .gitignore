@@ -1,1 +1,9 @@
 .DS_Store
+
+# Vosk model - 318MB, and GitHub rejects any file over 100MB
+vosk-model-*/
+vosk-model-*.zip
+
+# Student voice recordings. This repo is PUBLIC - these must never be pushed.
+clips/
+*.wav
