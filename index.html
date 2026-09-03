@@ -70,9 +70,10 @@
   .q{font-size:15px;color:#28536b;font-weight:600}
   .big{font-size:clamp(70px,17vw,150px);line-height:1.45;color:#123}
   .opts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
-  .opt{min-width:92px;min-height:92px;padding:8px 16px;border:3px solid #cfe3ef;border-radius:16px;
-    background:#fff;cursor:pointer;font-size:40px;display:grid;place-items:center;transition:.12s}
-  .opt.lat{font-size:19px;font-family:inherit;direction:ltr;min-height:70px}
+  .opt{min-width:clamp(96px,10vw,126px);min-height:clamp(96px,10vw,126px);padding:8px 16px;
+    border:3px solid #cfe3ef;border-radius:18px;background:#fff;cursor:pointer;
+    font-size:clamp(46px,6vw,64px);display:grid;place-items:center;transition:.12s}
+  .opt.lat{font-size:21px;font-family:inherit;direction:ltr;min-height:78px}
   .opt:hover{border-color:#2fa8e0}
   .opt.good{border-color:#2fa04a;background:#e9f9ec}
   .opt.bad{border-color:#d21f1f;background:#fdecec;opacity:.6}
@@ -97,7 +98,8 @@
   .cell.on .cap{color:#28536b}
   .arrow{font-size:30px;color:#8aa4b5;align-self:center}
   .waiting{color:#c9d8e2}
-  .chip{min-width:66px;min-height:66px;font-size:34px;border:3px solid #cfe3ef;border-radius:14px;
+  .chip{min-width:clamp(74px,8.5vw,108px);min-height:clamp(74px,8.5vw,108px);
+    font-size:clamp(40px,5.5vw,62px);border:3px solid #cfe3ef;border-radius:16px;
     background:#fff;cursor:pointer;display:grid;place-items:center;transition:.12s}
   .chip:hover{border-color:#2fa8e0}
   .chip.good{border-color:#2fa04a;background:#e9f9ec}
@@ -139,7 +141,7 @@
   #report ul{display:flex;flex-wrap:wrap;gap:7px;list-style:none}
   #report li{background:#fff2f2;border:1px solid #ffd0d0;border-radius:9px;padding:5px 10px;
     display:flex;align-items:center;gap:7px}
-  #report .g{font-size:25px}
+  #report .g{font-size:32px}
   #report .n{font-size:11px;color:#a44}
   #report .empty{color:#2a7;font-size:13px}
 
