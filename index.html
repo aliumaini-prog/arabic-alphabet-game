@@ -4,13 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Qaidah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Amiri: the Naskh cut by Bulaq Press, Cairo (مصر) — the Misri face. Amiri Quran is
+     the same design tuned for vowelled Quranic text; used for the large display text. -->
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
   body{font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#123;
        -webkit-user-select:none;user-select:none;display:flex;flex-direction:column;background:#bfe3f7}
-  .ar{font-family:"Geeza Pro","Al Bayan","Baghdad","Scheherazade New","Traditional Arabic",serif;
-      direction:rtl}
+  .ar{font-family:"Amiri","Geeza Pro","Al Bayan","Scheherazade New",serif;direction:rtl}
+  .item,.big,.step,.chip{font-family:"Amiri Quran","Amiri","Geeza Pro",serif}
   .red{color:#d21f1f}
 
   /* ---------- stage ---------- */
@@ -71,6 +76,16 @@
   .step.faded{color:#f0a6a6}
   .step.final{color:#d21f1f}
   .grp{display:inline-block;padding:0 .12em;border-bottom:4px solid #2fa8e0;margin:0 .12em}
+  .cell{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .cap{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#8aa4b5}
+  .cell.on .cap{color:#28536b}
+  .arrow{font-size:30px;color:#8aa4b5;align-self:center;padding-bottom:22px}
+  .waiting{color:#c9d8e2}
+  .chip{min-width:78px;min-height:78px;font-size:40px;border:3px solid #cfe3ef;border-radius:14px;
+    background:#fff;cursor:pointer;display:grid;place-items:center;transition:.12s}
+  .chip:hover{border-color:#2fa8e0}
+  .chip.good{border-color:#2fa04a;background:#e9f9ec}
+  .chip.bad{border-color:#d21f1f;background:#fdecec;opacity:.55}
 
   /* ---------- bar ---------- */
   #bar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;padding:9px 14px;
@@ -129,7 +144,8 @@
     <div class="card">
       <div class="q" id="jq">—</div>
       <div class="steps ar" id="jsteps"></div>
-      <div class="q" id="jhint" style="opacity:.6">tap to build it up</div>
+      <div class="q" id="jhint" style="opacity:.75"></div>
+      <div id="jactions" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"></div>
     </div>
   </div>
 
@@ -427,31 +443,42 @@ function askJoin() {
   }
   drawJoin();
 }
+function advanceJoin() { if (joinStep < 2) { joinStep++; drawJoin(); } }
+
 function drawJoin() {
   const { word, letter, label } = joinQ;
   $('jq').textContent = label;
-  const sep = [...word].join('  ');
   const cells = [
-    { t: sep,  c: 'shown' },      // letters apart, as the book's first column
-    { t: word, c: 'faded' },      // joined but pale, the book's middle column
-    { t: word, c: 'final' },      // joined and bold, the book's last column
+    { t: [...word].join('\u2003'), c: 'shown', cap: 'the letters' },  // book's 1st column
+    { t: word, c: 'faded', cap: 'joining' },                          // its pale middle
+    { t: word, c: 'final', cap: 'joined'  },                          // its bold final
   ];
-  // The book prints the finished form differently in the two sections: p6-10 sets
-  // the whole two-letter join in red, p11-16 sets the word in black with only the
-  // target letter red. Match each.
+  // p6-10 sets the finished two-letter join wholly in red; p11-16 sets the word in
+  // black with only the target letter red. Match each.
   const wholeRed = level().id === '2b';
   $('jsteps').innerHTML = cells.map((c, i) => {
-    if (i > joinStep) return '<span class="step">···</span>';
-    const cls = 'step ' + (i === 2 && wholeRed ? 'final' : c.c === 'final' ? 'shown' : c.c);
-    const body = (i === 2 && !wholeRed)
-      ? [...c.t].map(ch => ch === letter ? `<span class="red">${ch}</span>` : ch).join('')
-      : c.t;
-    return `<span class="${cls}">${body}</span>`;
-  }).join('<span class="step shown" style="font-size:28px">→</span>');
-  $('jhint').textContent = joinStep < 2 ? 'tap to join' : 'read it aloud, then mark it';
-  if (joinStep >= 2) {
-    $('jhint').innerHTML =
-      '<button id="jok">Correct</button> <button id="jno" class="ghost">Missed</button>';
+    const on = i <= joinStep;
+    const cls = 'step ' + (!on ? 'waiting'
+              : i === 2 && wholeRed ? 'final' : c.c === 'final' ? 'shown' : c.c);
+    const body = !on ? '?'
+      : (i === 2 && !wholeRed)
+        ? [...c.t].map(ch => ch === letter ? `<span class="red">${ch}</span>` : ch).join('')
+        : c.t;
+    return `<div class="cell${on ? ' on' : ''}"><div class="${cls}">${body}</div>`
+         + `<div class="cap">${c.cap}</div></div>`;
+  }).join('<div class="arrow">\u2192</div>');
+
+  if (joinStep < 2) {
+    $('jhint').textContent = 'Name both letters out loud, then join them';
+    $('jactions').innerHTML = '<button id="jnext">Join them \u2192</button>';
+    $('jnext').onclick = advanceJoin;
+    $('jsteps').onclick = advanceJoin;               // the row itself is tappable too
+    $('jsteps').style.cursor = 'pointer';
+  } else {
+    $('jhint').textContent = 'Now read it aloud';
+    $('jsteps').onclick = null; $('jsteps').style.cursor = '';
+    $('jactions').innerHTML =
+      '<button id="jok">Read it correctly</button> <button id="jno" class="ghost">Missed it</button>';
     $('jok').onclick = () => { score(true, word); askJoin(); };
     $('jno').onclick = () => { score(false, word); askJoin(); };
   }
@@ -463,29 +490,42 @@ function drawJoin() {
 let qatQ = null;
 function askQat() {
   const word = pick(QAT_WORDS);
+  qatQ = { word, done: false };
+  $('jq').textContent = 'Which letter here never joins to the next one?';
+  $('jsteps').onclick = null; $('jsteps').style.cursor = '';
+  $('jsteps').innerHTML = `<div class="cell on"><div class="step shown">${word}</div></div>`;
+  $('jhint').textContent = 'read the word, then tap that letter below';
+  // The letters are offered separately rather than tapped inside the word: splitting
+  // a joined word into spans breaks its shaping, so each chip shows the isolated form.
+  $('jactions').innerHTML = '';
+  for (const ch of [...word]) {
+    const el = document.createElement('div');
+    el.className = 'chip ar'; el.textContent = ch;
+    el.onclick = () => {
+      if (qatQ.done) return;
+      if (QAT.includes(ch)) { qatQ.done = true; el.classList.add('good'); score(true, word); revealQat(ch); }
+      else { el.classList.add('bad'); score(false, word); }
+    };
+    $('jactions').appendChild(el);
+  }
+}
+
+function revealQat(ch) {
+  const { word } = qatQ;
   const groups = qatGroups(word);
-  qatQ = { word, groups };
   const red = w => [...w].map(c => QAT.includes(c) ? `<span class="red">${c}</span>` : c).join('');
-  $('jq').textContent = 'Where does the join break?';
   $('jsteps').innerHTML =
-    `<span class="step shown">${groups.map(g => `<span class="grp">${red(g)}</span>`).join('')}</span>`
-    + '<span class="step shown" style="font-size:28px">→</span>'
-    + `<span class="step final">${red(word)}</span>`;
-  // A قطع letter at the very end of a word breaks nothing visible - there is
-  // nothing after it. Saying "breaks after ر" for نظر would contradict the screen.
-  const qatIn = [...word].filter(c => QAT.includes(c));
-  const last = word[word.length - 1];
-  const breaks = groups.length > 1;
-  $('jhint').innerHTML =
-    `<div style="margin-bottom:8px">` + (breaks
-      ? `breaks after <b class="ar" style="font-size:22px">`
-        + `${qatIn.filter(c => c !== last || groups.length > 1 && !QAT.includes(last)).join(' ') || qatIn.join(' ')}</b>`
-        + ` — a قطع letter never joins to the next one`
-      : `<b class="ar" style="font-size:22px">${qatIn.join(' ')}</b> is a قطع letter, `
-        + `but nothing follows it here — so the word stays in one piece`)
-    + '</div><button id="jok">Correct</button> <button id="jno" class="ghost">Missed</button>';
-  $('jok').onclick = () => { score(true, word); askQat(); };
-  $('jno').onclick = () => { score(false, word); askQat(); };
+      `<div class="cell on"><div class="step shown">${red(word)}</div><div class="cap">the word</div></div>`
+    + '<div class="arrow">\u2192</div>'
+    + `<div class="cell on"><div class="step final">`
+    + groups.map(g => `<span class="grp">${red(g)}</span>`).join('')
+    + `</div><div class="cap">${groups.length > 1 ? 'breaks into ' + groups.length : 'stays whole'}</div></div>`;
+  $('jhint').innerHTML = groups.length > 1
+    ? `<b class="ar" style="font-size:24px">${ch}</b> is a قطع letter — the word breaks right after it`
+    : `<b class="ar" style="font-size:24px">${ch}</b> is a قطع letter, but here it is the last `
+      + `letter, so there is nothing after it to refuse — the word stays whole`;
+  $('jactions').innerHTML = '<button id="jnext2">Next word \u2192</button>';
+  $('jnext2').onclick = askQat;
 }
 
 /* ==========================================================================
