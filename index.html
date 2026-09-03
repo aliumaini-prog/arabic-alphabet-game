@@ -70,10 +70,12 @@
   .q{font-size:15px;color:#28536b;font-weight:600}
   .big{font-size:clamp(70px,17vw,150px);line-height:1.45;color:#123}
   .opts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
-  .opt{min-width:clamp(96px,10vw,126px);min-height:clamp(96px,10vw,126px);padding:8px 16px;
+  .opt{min-width:clamp(96px,10vw,126px);min-height:clamp(96px,10vw,126px);padding:6px 20px;
     border:3px solid #cfe3ef;border-radius:18px;background:#fff;cursor:pointer;
-    font-size:clamp(46px,6vw,64px);display:grid;place-items:center;transition:.12s}
-  .opt.lat{font-size:21px;font-family:inherit;direction:ltr;min-height:78px}
+    font-size:clamp(44px,5.6vw,60px);line-height:1.2;display:grid;place-items:center;
+    transition:.12s}
+  .opt.lat{font-size:21px;font-family:inherit;direction:ltr;min-height:78px;line-height:1.4}
+  .opt.lat .gl{top:0}
   .opt:hover{border-color:#2fa8e0}
   .opt.good{border-color:#2fa04a;background:#e9f9ec}
   .opt.bad{border-color:#d21f1f;background:#fdecec;opacity:.6}
@@ -98,8 +100,10 @@
   .cell.on .cap{color:#28536b}
   .arrow{font-size:30px;color:#8aa4b5;align-self:center}
   .waiting{color:#c9d8e2}
+  .gl{display:block;position:relative;top:-0.6em}   /* centres Amiri's ink, see note above */
   .chip{min-width:clamp(74px,8.5vw,108px);min-height:clamp(74px,8.5vw,108px);
-    font-size:clamp(40px,5.5vw,62px);border:3px solid #cfe3ef;border-radius:16px;
+    font-size:clamp(38px,5vw,58px);line-height:1.2;padding:6px 18px;overflow:hidden;
+    border:3px solid #cfe3ef;border-radius:16px;
     background:#fff;cursor:pointer;display:grid;place-items:center;transition:.12s}
   .chip:hover{border-color:#2fa8e0}
   .chip.good{border-color:#2fa04a;background:#e9f9ec}
@@ -456,7 +460,7 @@ function askForm() {
   for (const o of opts) {
     const el = document.createElement('div');
     el.className = 'opt' + (kind === 'whichPos' ? ' lat' : ' ar');
-    el.textContent = o;
+    el.innerHTML = `<span class="gl">${o}</span>`;
     el.onclick = () => {
       if (el.classList.contains('good') || el.classList.contains('bad')) return;
       const good = o === formQ.right;
@@ -578,7 +582,7 @@ function drawJoin() {
     if (buildQ.usedKeys && buildQ.usedKeys.has(k)) return;   // a used chip leaves the pool
     const el = document.createElement('div');
     el.className = 'chip ar';
-    el.textContent = ch;
+    el.innerHTML = `<span class="gl">${ch}</span>`;
     el.onclick = () => {
       if (ch !== want) {                     // wrong letter, or wrong shape, or out of order
         el.classList.remove('wrong'); void el.offsetWidth; el.classList.add('wrong');
@@ -607,7 +611,7 @@ function askQat() {
   $('jactions').innerHTML = '';
   for (const ch of [...word]) {
     const el = document.createElement('div');
-    el.className = 'chip ar'; el.textContent = ch;
+    el.className = 'chip ar'; el.innerHTML = `<span class="gl">${ch}</span>`;
     el.onclick = () => {
       if (qatQ.done) return;
       if (QAT.includes(ch)) { qatQ.done = true; el.classList.add('good'); score(true, word); revealQat(ch); }
