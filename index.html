@@ -436,11 +436,18 @@ function drawJoin() {
     { t: word, c: 'faded' },      // joined but pale, the book's middle column
     { t: word, c: 'final' },      // joined and bold, the book's last column
   ];
-  $('jsteps').innerHTML = cells.map((c, i) =>
-    `<span class="step ${i <= joinStep ? c.c : ''}">${
-       i <= joinStep ? c.t.replace(new RegExp(letter, 'g'),
-            i === 2 ? `<span class="red">${letter}</span>` : letter) : '···'}</span>`
-  ).join('<span class="step shown" style="font-size:28px">→</span>');
+  // The book prints the finished form differently in the two sections: p6-10 sets
+  // the whole two-letter join in red, p11-16 sets the word in black with only the
+  // target letter red. Match each.
+  const wholeRed = level().id === '2b';
+  $('jsteps').innerHTML = cells.map((c, i) => {
+    if (i > joinStep) return '<span class="step">···</span>';
+    const cls = 'step ' + (i === 2 && wholeRed ? 'final' : c.c === 'final' ? 'shown' : c.c);
+    const body = (i === 2 && !wholeRed)
+      ? [...c.t].map(ch => ch === letter ? `<span class="red">${ch}</span>` : ch).join('')
+      : c.t;
+    return `<span class="${cls}">${body}</span>`;
+  }).join('<span class="step shown" style="font-size:28px">→</span>');
   $('jhint').textContent = joinStep < 2 ? 'tap to join' : 'read it aloud, then mark it';
   if (joinStep >= 2) {
     $('jhint').innerHTML =
