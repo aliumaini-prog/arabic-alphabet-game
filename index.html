@@ -71,21 +71,26 @@
 
   /* ---------- join ---------- */
   .steps{display:flex;gap:clamp(10px,4vw,44px);align-items:center;justify-content:center;flex-wrap:wrap}
-  .step{font-size:clamp(48px,11vw,104px);color:#c9d8e2;transition:color .25s,transform .25s}
+  .step{font-size:clamp(62px,13vw,128px);color:#c9d8e2;transition:color .25s,transform .25s;
+        min-height:1.35em;line-height:1.5;padding-bottom:.22em}
   .step.shown{color:#123}
   .step.faded{color:#f0a6a6}
   .step.final{color:#d21f1f}
   .grp{display:inline-block;padding:0 .12em;border-bottom:4px solid #2fa8e0;margin:0 .12em}
   .cell{display:flex;flex-direction:column;align-items:center;gap:6px}
-  .cap{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#8aa4b5}
+  .cap{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#8aa4b5;margin-top:4px}
   .cell.on .cap{color:#28536b}
-  .arrow{font-size:30px;color:#8aa4b5;align-self:center;padding-bottom:22px}
+  .arrow{font-size:30px;color:#8aa4b5;align-self:center}
   .waiting{color:#c9d8e2}
   .chip{min-width:78px;min-height:78px;font-size:40px;border:3px solid #cfe3ef;border-radius:14px;
     background:#fff;cursor:pointer;display:grid;place-items:center;transition:.12s}
   .chip:hover{border-color:#2fa8e0}
   .chip.good{border-color:#2fa04a;background:#e9f9ec}
   .chip.bad{border-color:#d21f1f;background:#fdecec;opacity:.55}
+  .chip.used{opacity:.32;border-color:#cfe3ef;cursor:default}
+  .chip.next{border-color:#2fa8e0;box-shadow:0 0 0 5px rgba(47,168,224,.22)}
+  .chip.shake{animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 
   /* ---------- bar ---------- */
   #bar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;padding:9px 14px;
@@ -427,61 +432,77 @@ function askForm() {
 /* ==========================================================================
    EXERCISE 3 - JOIN   (p6-16)  mirrors the book's separate -> faded -> bold columns
    ========================================================================== */
-let joinQ = null, joinStep = 0;
+let buildQ = null;
+
 function askJoin() {
   const lv = level();
-  joinStep = 0;
   if (lv.id === '2b') {
     const [letter, atStart, atEnd] = pick(PAIRS);
     const w = pick([atStart, atEnd]);
-    joinQ = { word: w, letter,
+    buildQ = { word: w, letter,
       label: `${letter} ${w === atStart ? 'شروع ما (at the start)' : 'اخر ما (at the end)'}` };
   } else {
     const row = pick(W3), i = 1 + (Math.random() * 3 | 0);
-    joinQ = { word: row[i], letter: row[0],
+    buildQ = { word: row[i], letter: row[0],
       label: `${row[0]} ${['', 'شروع ما (start)', 'وسط ما (middle)', 'اخر ما (end)'][i]}` };
   }
+  buildQ.letters = [...buildQ.word];
+  buildQ.idx = 0;
   drawJoin();
 }
-function advanceJoin() { if (joinStep < 2) { joinStep++; drawJoin(); } }
+
+// The first n letters, with a ZWJ so the last one shows its JOINING shape rather
+// than its isolated one: ب -> بـ, بص -> بصـ. That is the whole lesson of p6-16 —
+// a letter changes shape depending on what follows it.
+function partial(word, n) {
+  if (n <= 0) return '';
+  const s = word.slice(0, n);
+  return n < word.length ? s + ZWJ : s;
+}
 
 function drawJoin() {
-  const { word, letter, label } = joinQ;
+  const { word, letters, idx, letter, label } = buildQ;
+  const done = idx >= letters.length;
+  const wholeRed = level().id === '2b';   // p6-10 reds the whole join, p11-16 one letter
   $('jq').textContent = label;
-  const cells = [
-    { t: [...word].join('\u2003'), c: 'shown', cap: 'the letters' },  // book's 1st column
-    { t: word, c: 'faded', cap: 'joining' },                          // its pale middle
-    { t: word, c: 'final', cap: 'joined'  },                          // its bold final
-  ];
-  // p6-10 sets the finished two-letter join wholly in red; p11-16 sets the word in
-  // black with only the target letter red. Match each.
-  const wholeRed = level().id === '2b';
-  $('jsteps').innerHTML = cells.map((c, i) => {
-    const on = i <= joinStep;
-    const cls = 'step ' + (!on ? 'waiting'
-              : i === 2 && wholeRed ? 'final' : c.c === 'final' ? 'shown' : c.c);
-    const body = !on ? '?'
-      : (i === 2 && !wholeRed)
-        ? [...c.t].map(ch => ch === letter ? `<span class="red">${ch}</span>` : ch).join('')
-        : c.t;
-    return `<div class="cell${on ? ' on' : ''}"><div class="${cls}">${body}</div>`
-         + `<div class="cap">${c.cap}</div></div>`;
-  }).join('<div class="arrow">\u2192</div>');
 
-  if (joinStep < 2) {
-    $('jhint').textContent = 'Name both letters out loud, then join them';
-    $('jactions').innerHTML = '<button id="jnext">Join them \u2192</button>';
-    $('jnext').onclick = advanceJoin;
-    $('jsteps').onclick = advanceJoin;               // the row itself is tappable too
-    $('jsteps').style.cursor = 'pointer';
-  } else {
-    $('jhint').textContent = 'Now read it aloud';
-    $('jsteps').onclick = null; $('jsteps').style.cursor = '';
-    $('jactions').innerHTML =
-      '<button id="jok">Read it correctly</button> <button id="jno" class="ghost">Missed it</button>';
-    $('jok').onclick = () => { score(true, word); askJoin(); };
-    $('jno').onclick = () => { score(false, word); askJoin(); };
+  const body = !done ? partial(word, idx)
+    : wholeRed ? `<span class="red">${word}</span>`
+    : [...word].map(c => c === letter ? `<span class="red">${c}</span>` : c).join('');
+  $('jsteps').onclick = null; $('jsteps').style.cursor = '';
+  $('jsteps').innerHTML =
+      `<div class="cell on"><div class="step shown">${body || '&nbsp;'}</div>`
+    + `<div class="cap">${done ? 'joined' : idx ? 'so far' : ''}</div></div>`;
+
+  $('jactions').innerHTML = '';
+  if (done) {
+    $('jhint').textContent = 'Now read the whole word aloud';
+    const ok = document.createElement('button'); ok.textContent = 'Read it correctly';
+    const no = document.createElement('button'); no.textContent = 'Missed it'; no.className = 'ghost';
+    ok.onclick = () => { score(true, word); askJoin(); };
+    no.onclick = () => { score(false, word); askJoin(); };
+    $('jactions').append(ok, no);
+    return;
   }
+
+  $('jhint').textContent = idx === 0
+    ? 'Name the first letter, then tap it'
+    : 'Name the next letter, then tap it';
+  // Chips sit in an RTL row, so letters[0] is the rightmost — the reading order.
+  letters.forEach((ch, k) => {
+    const el = document.createElement('div');
+    el.className = 'chip ar' + (k < idx ? ' used' : k === idx ? ' next' : '');
+    el.textContent = ch;
+    el.onclick = () => {
+      if (k !== idx) {                       // must go in order, right to left
+        el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+        return;
+      }
+      buildQ.idx++;
+      drawJoin();
+    };
+    $('jactions').appendChild(el);
+  });
 }
 
 /* ==========================================================================
@@ -516,7 +537,7 @@ function revealQat(ch) {
   const red = w => [...w].map(c => QAT.includes(c) ? `<span class="red">${c}</span>` : c).join('');
   $('jsteps').innerHTML =
       `<div class="cell on"><div class="step shown">${red(word)}</div><div class="cap">the word</div></div>`
-    + '<div class="arrow">\u2192</div>'
+    + '<div class="arrow">\u2190</div>'
     + `<div class="cell on"><div class="step final">`
     + groups.map(g => `<span class="grp">${red(g)}</span>`).join('')
     + `</div><div class="cap">${groups.length > 1 ? 'breaks into ' + groups.length : 'stays whole'}</div></div>`;
