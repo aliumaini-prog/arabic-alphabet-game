@@ -169,13 +169,6 @@
   <label>Lesson &amp; level
     <select id="level"></select>
   </label>
-  <label id="lMode">Practice
-    <select id="mode">
-      <option value="build">Build the word</option>
-      <option value="find">Find the letters</option>
-      <option value="form">Pick the right form</option>
-    </select>
-  </label>
   <span class="page" id="page">p—</span>
   <label id="lRise">Rise <span class="val" id="riseV">8s</span>
     <input type="range" id="rise" min="3" max="20" step="1" value="8">
@@ -240,8 +233,10 @@ const LESSONS = [
     { id:'2a', ar:'احوال الحروف', name:'Letter forms', book:'3-5', ex:'form',
       teaches:'One letter, four shapes: alone, at the start, in the middle, at the end.' },
     { id:'2b', ar:'بے حرفي الفاظ', name:'Two-letter joins', book:'6-10', ex:'join',
+      modes:['build','find','form'],
       teaches:'Name both letters, then read them joined.' },
     { id:'2c', ar:'تين حرفي الفاظ', name:'Three-letter words', book:'11-16', ex:'join',
+      modes:['build','find','form'],
       teaches:'The red letter sits at the start, the middle or the end.' },
     { id:'2d', ar:'حروف القطع', name:'Letters that do not join', book:'17-18', ex:'qat',
       teaches:'ا د ذ ر ز و join to the letter before them, never to the one after.' },
@@ -278,7 +273,13 @@ const pick = a => a[Math.random() * a.length | 0];
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random()*(i+1)|0;
                          [a[i],a[j]] = [a[j],a[i]]; } return a; };
 
-const FLAT = LESSONS.flatMap(L => L.levels.map(v => ({...v, lesson:L})));
+// A practice mode is a different activity on the same book pages, so each one gets
+// its own entry in the level list rather than hiding behind a second dropdown.
+const MODE_NAME = { build: 'build it up', find: 'find the letters', form: 'pick the shape' };
+const FLAT = LESSONS.flatMap(L => L.levels.flatMap(v => v.modes
+  ? v.modes.map(m => ({ ...v, lesson: L, mode: m, base: v.id,
+                        id: v.id + '-' + m, name: v.name + ' — ' + MODE_NAME[m] }))
+  : [{ ...v, lesson: L, base: v.id }]));
 const level = () => FLAT[$('level').selectedIndex];
 
 let hits = 0, missed = 0, running = false, timer = null, bag = [], missLog = new Map();
@@ -463,7 +464,7 @@ const formsOf = l => QAT.includes(l)
 
 function askJoin() {
   const lv = level();
-  if (lv.id === '2b') {
+  if (lv.base === '2b') {
     const [letter, atStart, atEnd] = pick(PAIRS);
     const w = pick([atStart, atEnd]);
     buildQ = { word: w, letter,
@@ -514,7 +515,7 @@ const HOWTO = {
 function drawJoin() {
   const { word, letters, idx, letter, label, pool } = buildQ;
   const done = idx >= letters.length;
-  const wholeRed = level().id === '2b';   // p6-10 reds the whole join, p11-16 one letter
+  const wholeRed = level().base === '2b';  // p6-10 reds the whole join, p11-16 one letter
   $('jq').textContent = label;
   $('jsteps').onclick = null; $('jsteps').style.cursor = '';
   $('jactions').className = '';
@@ -632,7 +633,6 @@ function showPane(ex) {
   const isBalloon = ex === 'balloon';
   $('lRise').style.display = $('lGap').style.display = isBalloon ? '' : 'none';
   $('play').style.display = isBalloon ? '' : 'none';
-  $('lMode').style.display = ex === 'join' ? '' : 'none';
 }
 
 function setRunning(on) {
@@ -651,6 +651,7 @@ function reset() {
   $('hits').textContent = 0; $('miss').textContent = 0;
   $('report').classList.remove('show');
   $('play').textContent = 'Start';
+  joinMode = lv.mode || 'build';
   $('page').textContent = 'p' + lv.book;
   $('teach').textContent = `${lv.lesson.ar} · ${lv.ar} — ${lv.teaches}`;
   if (lv.rise) { $('rise').value = lv.rise; $('riseV').textContent = lv.rise + 's'; }
@@ -700,12 +701,14 @@ function showReport() {
 }
 
 /* ---------- wiring ---------- */
+// Built from FLAT, not LESSONS: level() indexes FLAT, so the menu must have exactly
+// one option per FLAT entry or selecting one loads a different activity.
 $('level').innerHTML = LESSONS.map(L =>
   `<optgroup label="${L.n}. ${L.ar} — ${L.latin}">`
-  + L.levels.map(v => `<option>${v.id} · ${v.name} (p${v.book})</option>`).join('')
+  + FLAT.filter(v => v.lesson === L)
+        .map(v => `<option>${v.id} · ${v.name} (p${v.book})</option>`).join('')
   + '</optgroup>').join('');
 $('level').onchange = () => { missLog.clear(); reset(); };
-$('mode').onchange  = () => { joinMode = $('mode').value; reset(); };
 $('who').onchange   = () => { missLog.clear(); reset(); };
 $('play').onclick   = () => setRunning(!running);
 $('reset').onclick  = () => { missLog.clear(); reset(); };
@@ -771,7 +774,21 @@ function runSelfTest() {
      'zabar/zer/pesh are U+064E / U+0650 / U+064F');
   ok(vowelled('ا', K) === 'إ' + K && vowelled('ا', F) === 'أ' + F,
      'vowelled alif is written أ / إ as on p20 and p25');
-  ok(FLAT.length === 11, `11 levels (got ${FLAT.length})`);
+  ok(FLAT.length === 15, `15 activities (got ${FLAT.length})`);
+  ok(FLAT.filter(l => l.ex === 'join').length === 6,
+     'each join level appears three times, once per practice mode');
+  ok(FLAT.filter(l => l.ex === 'join').every(l => MODE_NAME[l.mode]),
+     'every join activity names its mode');
+  ok(new Set(FLAT.map(l => l.id)).size === FLAT.length, 'activity ids are unique');
+  // The menu indexes into FLAT, so a mismatch silently loads the wrong activity.
+  ok($('level').options.length === FLAT.length,
+     `menu has one option per activity (${$('level').options.length} vs ${FLAT.length})`);
+  ok([...$('level').options].every((o, i) => o.text.startsWith(FLAT[i].id + ' ')),
+     'menu order matches FLAT order');
+  ok(FLAT.every(l => l.base && (l.base === l.id || l.id.startsWith(l.base + '-'))),
+     'every activity keeps its un-suffixed base id');
+  ok(FLAT.filter(l => l.base === '2b').length === 3 && FLAT.filter(l => l.base === '2c').length === 3,
+     'the two-letter and three-letter levels each have three modes');
   ok(FLAT.every(l => l.book && l.teaches), 'every level names its book page and what it teaches');
   ok(FLAT.filter(l => l.ex === 'balloon').every(l => l.items && l.items.length >= 28),
      'every balloon level has its items');

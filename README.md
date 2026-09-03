@@ -12,8 +12,8 @@ page it came from, so the screen matches the page open in front of the child.
 |---|---|---|
 | 1a | p1 | Name each of the 28 letters. ق is *qaaf*, ك is *kaaf*. |
 | 2a | p3–5 | **Letter forms** — the same letter alone, at the start, in the middle, at the end. No harakat. Self-scoring. |
-| 2b | p6–10 | Two letters joining, shown apart → pale → joined, as the book prints it. |
-| 2c | p11–16 | Three-letter words; the target letter is red so its position is what's tested. |
+| 2b | p6–10 | Two letters joining. Three ways to practise (below). |
+| 2c | p11–16 | Three-letter words. Same three ways; the target letter is red. |
 | 2d | p17–18 | **حروف القطع** — ا د ذ ر ز و join to the letter before, never the one after. |
 | 3a / 3c / 3e | p20 / 25 / 30 | Every letter with zabar / zer / pesh. The 8 letters the book stars (خ ر ص ض ط ظ غ ق) carry a **جاڑو** badge. |
 | 3b | p21–24 | Words where every mark is zabar. |
@@ -21,6 +21,20 @@ page it came from, so the screen matches the page open in front of the child.
 | 3f | p31–35 | Pesh in red, including the two-word items from p35. |
 
 509 items in total.
+
+## Three ways to practise joining (levels 2b and 2c)
+
+Each appears as its own entry in the level list.
+
+- **Build it up** — the letters, tapped in reading order (right to left). Each tap shows
+  that letter's joining shape: ب → **بـ**, then بص → **بصـ**, then **بصل**.
+- **Find the letters** — the word is given already joined, with its letters mixed among
+  decoys. The student reads it and picks out the letters in order.
+- **Pick the shape** — the letters are given separated, with every shape each can take.
+  The student picks the shape each one needs: **فـ** + **ـعـ** + **ـل** = **فعل**.
+
+The routine is the same throughout: **the student says it out loud, the teacher taps.**
+Each screen states this.
 
 ## Using it in a lesson
 
