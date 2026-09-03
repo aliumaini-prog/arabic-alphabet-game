@@ -3,649 +3,655 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Balloon Qaida</title>
+<title>Qaidah</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
-  body{
-    font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    color:#123; -webkit-user-select:none; user-select:none;
-    display:flex; flex-direction:column;
-    background:#bfe3f7;
-  }
+  body{font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#123;
+       -webkit-user-select:none;user-select:none;display:flex;flex-direction:column;background:#bfe3f7}
+  .ar{font-family:"Geeza Pro","Al Bayan","Baghdad","Scheherazade New","Traditional Arabic",serif;
+      direction:rtl}
+  .red{color:#d21f1f}
 
-  /* ---------- sky ---------- */
-  #sky{
-    position:relative; flex:1; overflow:hidden;
-    background:
-      radial-gradient(120% 80% at 50% 65%,#f2fbff 0%,#cfeaf9 45%,#9ed3f0 100%);
-  }
-  .cloud{
-    position:absolute; background:#fff; border-radius:50%;
-    box-shadow:0 0 0 rgba(0,0,0,0); opacity:.95;
-    filter:drop-shadow(0 6px 10px rgba(120,170,200,.25));
-  }
+  /* ---------- stage ---------- */
+  #stage{position:relative;flex:1;overflow:hidden;
+    background:radial-gradient(120% 80% at 50% 65%,#f2fbff 0%,#cfeaf9 45%,#9ed3f0 100%)}
+  .cloud{position:absolute;background:#fff;border-radius:50%;opacity:.95;
+    filter:drop-shadow(0 6px 10px rgba(120,170,200,.25))}
   .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
   .cloud::before{width:65%;height:110%;left:-28%;top:-8%}
   .cloud::after{width:80%;height:125%;right:-30%;top:-22%}
-  .c1{width:190px;height:74px;left:4%;top:8%}
-  .c2{width:250px;height:88px;right:6%;top:5%}
-  .c3{width:150px;height:60px;left:34%;top:20%;opacity:.7}
-  .c4{width:210px;height:78px;right:26%;top:26%;opacity:.55}
+  .c1{width:190px;height:74px;left:4%;top:7%}
+  .c2{width:250px;height:88px;right:6%;top:4%}
+  .c3{width:150px;height:60px;left:34%;top:19%;opacity:.7}
+  .pane{position:absolute;inset:0;display:none}
+  .pane.on{display:block}
 
   /* ---------- balloons ---------- */
-  #field{position:absolute;inset:0}
   #field.paused *{animation-play-state:paused!important}
-
-  .rise{
-    position:absolute; bottom:0;
-    animation:rise linear forwards;
-    will-change:transform;
-  }
-  @keyframes rise{ to{ transform:translateY(calc(-100vh - 46vh)); } }
-
-  .sway{ animation:sway 3.4s ease-in-out infinite alternate; }
-  @keyframes sway{ from{transform:translateX(-14px) rotate(-2.5deg)} to{transform:translateX(14px) rotate(2.5deg)} }
-
-  .balloon{
-    position:relative; cursor:pointer;
-    width:var(--w); height:calc(var(--w) * 1.22);
-    border-radius:50% 50% 50% 50% / 58% 58% 42% 42%;
-    background:
-      radial-gradient(ellipse at 30% 24%, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 42%),
-      radial-gradient(ellipse at 72% 82%, rgba(0,0,0,.14) 0%, rgba(0,0,0,0) 46%),
-      var(--c);
-    display:grid; place-items:center;
-    filter:drop-shadow(0 10px 14px rgba(70,120,150,.28));
-    transition:filter .12s;
-  }
+  .rise{position:absolute;bottom:0;animation:rise linear forwards;will-change:transform}
+  @keyframes rise{ to{ transform:translateY(calc(-100vh - 46vh)) } }
+  .sway{animation:sway 3.4s ease-in-out infinite alternate}
+  @keyframes sway{from{transform:translateX(-14px) rotate(-2.5deg)}to{transform:translateX(14px) rotate(2.5deg)}}
+  .balloon{position:relative;cursor:pointer;width:var(--w);height:calc(var(--w)*1.22);
+    border-radius:50% 50% 50% 50%/58% 58% 42% 42%;display:grid;place-items:center;
+    background:radial-gradient(ellipse at 30% 24%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 42%),
+               radial-gradient(ellipse at 72% 82%,rgba(0,0,0,.14) 0%,rgba(0,0,0,0) 46%),var(--c);
+    filter:drop-shadow(0 10px 14px rgba(70,120,150,.28));transition:filter .12s}
   .balloon:hover{filter:drop-shadow(0 10px 20px rgba(70,120,150,.5)) brightness(1.04)}
-  /* knot */
-  .balloon::after{
-    content:""; position:absolute; bottom:-9px; left:50%; translate:-50% 0;
-    border:9px solid transparent; border-top-color:var(--c); opacity:.95;
-  }
-  .string{
-    position:absolute; top:calc(var(--w) * 1.22 + 6px); left:50%;
-    width:16px; height:46px; margin-left:-2px;
-    border-left:2px solid rgba(255,255,255,.9);
-    border-bottom:2px solid rgba(255,255,255,.9);
-    border-radius:0 0 0 90%;
-    pointer-events:none;
-  }
-
-  .item{
-    font-family:"Geeza Pro","Al Bayan","Baghdad","Scheherazade New","Traditional Arabic",serif;
-    font-size:calc(var(--w) * var(--fs));
-    line-height:1.35; color:#111; direction:rtl;
-    padding-bottom:.06em; white-space:nowrap; pointer-events:none;
-  }
-
+  .balloon::after{content:"";position:absolute;bottom:-9px;left:50%;translate:-50% 0;
+    border:9px solid transparent;border-top-color:var(--c);opacity:.95}
+  .string{position:absolute;top:calc(var(--w)*1.22 + 6px);left:50%;width:16px;height:46px;
+    margin-left:-2px;border-left:2px solid rgba(255,255,255,.9);
+    border-bottom:2px solid rgba(255,255,255,.9);border-radius:0 0 0 90%;pointer-events:none}
+  .item{font-size:calc(var(--w)*var(--fs));line-height:1.35;color:#111;
+        padding-bottom:.06em;white-space:nowrap;pointer-events:none}
+  .heavy{position:absolute;top:8%;left:50%;translate:-50% 0;font-size:13px;font-weight:700;
+    color:#b4530a;background:#fff5e6;border-radius:8px;padding:1px 7px;pointer-events:none}
   .popped{animation:pop .18s ease-out forwards!important}
-  @keyframes pop{ to{ transform:scale(1.55); opacity:0 } }
+  @keyframes pop{ to{ transform:scale(1.55);opacity:0 } }
 
-  /* ---------- controls ---------- */
-  #bar{
-    display:flex; flex-wrap:wrap; gap:14px 18px; align-items:center;
-    padding:10px 16px; background:#0d2a3d; color:#eaf6ff;
-    box-shadow:0 -4px 14px rgba(0,0,0,.18); z-index:5;
-  }
-  #bar label{display:flex;flex-direction:column;gap:3px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;opacity:.85}
-  select,button{font:inherit;border-radius:8px;border:0;padding:7px 12px;cursor:pointer}
-  select{background:#eaf6ff;color:#0d2a3d;min-width:190px}
+  /* ---------- form match ---------- */
+  .card{position:absolute;inset:0;display:grid;place-content:center;gap:18px;padding:20px;
+    text-align:center;overflow-y:auto}
+  .q{font-size:15px;color:#28536b;font-weight:600}
+  .big{font-size:clamp(70px,17vw,150px);line-height:1.45;color:#123}
+  .opts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+  .opt{min-width:104px;min-height:104px;padding:10px 18px;border:3px solid #cfe3ef;border-radius:16px;
+    background:#fff;cursor:pointer;font-size:44px;display:grid;place-items:center;transition:.12s}
+  .opt.lat{font-size:19px;font-family:inherit;direction:ltr;min-height:70px}
+  .opt:hover{border-color:#2fa8e0}
+  .opt.good{border-color:#2fa04a;background:#e9f9ec}
+  .opt.bad{border-color:#d21f1f;background:#fdecec;opacity:.6}
+
+  /* ---------- join ---------- */
+  .steps{display:flex;gap:clamp(10px,4vw,44px);align-items:center;justify-content:center;flex-wrap:wrap}
+  .step{font-size:clamp(48px,11vw,104px);color:#c9d8e2;transition:color .25s,transform .25s}
+  .step.shown{color:#123}
+  .step.faded{color:#f0a6a6}
+  .step.final{color:#d21f1f}
+  .grp{display:inline-block;padding:0 .12em;border-bottom:4px solid #2fa8e0;margin:0 .12em}
+
+  /* ---------- bar ---------- */
+  #bar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;padding:9px 14px;
+    background:#0d2a3d;color:#eaf6ff;box-shadow:0 -4px 14px rgba(0,0,0,.18);z-index:5}
+  #bar label{display:flex;flex-direction:column;gap:3px;font-size:10px;letter-spacing:.04em;
+    text-transform:uppercase;opacity:.85}
+  select,button,input[type=text]{font:inherit;border-radius:8px;border:0;padding:7px 11px;cursor:pointer}
+  input[type=text]{cursor:text;width:120px}
+  select{background:#eaf6ff;color:#0d2a3d;max-width:260px}
   button{background:#2fa8e0;color:#fff;font-weight:600}
   button:hover{filter:brightness(1.1)}
   button.ghost{background:#20455c}
-  input[type=range]{width:130px;accent-color:#2fa8e0}
-  .val{font-variant-numeric:tabular-nums;font-size:13px;text-transform:none;opacity:1;font-weight:600}
-  .score{margin-left:auto;display:flex;gap:16px;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+  input[type=range]{width:112px;accent-color:#2fa8e0}
+  .val{font-variant-numeric:tabular-nums;font-size:13px;text-transform:none;font-weight:600;opacity:1}
+  .page{background:#f3e14f;color:#0d2a3d;border-radius:8px;padding:4px 9px;font-weight:700;font-size:12px}
+  .teach{flex-basis:100%;font-size:12px;opacity:.75;margin-top:-4px}
+  .score{margin-left:auto;display:flex;gap:14px;font-size:21px;font-weight:700;
+    font-variant-numeric:tabular-nums}
   .ok{color:#7ee08a} .bad{color:#ff9b9b}
 
   /* ---------- report ---------- */
-  #report{
-    position:absolute; inset:auto 0 0 0; max-height:62%; overflow:auto;
-    background:rgba(255,255,255,.96); padding:16px 20px 20px;
-    border-top:3px solid #2fa8e0; display:none; z-index:4;
-  }
+  #report{position:absolute;inset:auto 0 0 0;max-height:64%;overflow:auto;background:rgba(255,255,255,.97);
+    padding:14px 18px 18px;border-top:3px solid #2fa8e0;display:none;z-index:4}
   #report.show{display:block}
-  #report h2{font-size:15px;margin-bottom:10px;color:#0d2a3d}
-  #report ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none}
-  #report li{
-    background:#fff2f2;border:1px solid #ffd0d0;border-radius:10px;
-    padding:6px 12px;display:flex;align-items:center;gap:8px;
-  }
-  #report .g{font-family:"Geeza Pro","Al Bayan",serif;font-size:26px;direction:rtl}
-  #report .n{font-size:12px;color:#a44}
-  #report .empty{color:#2a7;font-size:14px}
+  #report h2{font-size:14px;margin-bottom:4px;color:#0d2a3d}
+  #report h3{font-size:12px;margin:12px 0 6px;color:#28536b}
+  #report ul{display:flex;flex-wrap:wrap;gap:7px;list-style:none}
+  #report li{background:#fff2f2;border:1px solid #ffd0d0;border-radius:9px;padding:5px 10px;
+    display:flex;align-items:center;gap:7px}
+  #report .g{font-size:25px}
+  #report .n{font-size:11px;color:#a44}
+  #report .empty{color:#2a7;font-size:13px}
 
-  #micbox{display:flex;align-items:center;gap:10px}
-  #meterwrap{width:70px;height:8px;background:#20455c;border-radius:4px;overflow:hidden}
-  #meter{height:100%;width:0;background:linear-gradient(90deg,#7ee08a,#f3e14f);transition:width .06s}
-  #heard{font-size:20px;min-width:74px;direction:rtl;font-family:"Geeza Pro","Al Bayan",serif}
-  #heard.no{opacity:.45}
-  button.on{background:#7ee08a;color:#0d2a3d}
-  button:disabled{background:#20455c;opacity:.5;cursor:not-allowed}
-
-  .rise.target .balloon{outline:4px solid #fff;outline-offset:6px;
-    box-shadow:0 0 0 8px rgba(47,168,224,.35);border-radius:50% 50% 50% 50%/58% 58% 42% 42%}
-  .rise.wrong .balloon{animation:shake .45s}
-  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
-  #heard .vs{font-size:13px;opacity:.8;margin-inline-start:6px;font-family:system-ui,sans-serif}
-  #heard .no{font-size:12px;opacity:.5;font-family:system-ui,sans-serif}
-
-  #cal{position:absolute;inset:0;background:rgba(8,30,45,.93);display:none;
-       place-items:center;z-index:8;color:#eaf6ff}
-  #cal.show{display:grid}
-  #cal .card{background:#0d2a3d;border-radius:16px;padding:26px 40px;text-align:center;border:0}
-  #cal h2{font-size:17px;margin-bottom:6px}
-  #cal p{font-size:13px;opacity:.75;margin-bottom:14px}
-  .calglyph{font-family:"Geeza Pro","Al Bayan",serif;font-size:88px;direction:rtl;line-height:1.3}
-  .calmsg{font-size:14px;margin:8px 0 16px;min-height:20px}
-
-  #tests{position:absolute;inset:0;background:#fff;padding:24px;overflow:auto;z-index:9;font:13px/1.6 ui-monospace,Menlo,monospace;display:none}
+  #tests{position:absolute;inset:0;background:#fff;padding:22px;overflow:auto;z-index:9;
+    font:13px/1.6 ui-monospace,Menlo,monospace;display:none}
   #tests.show{display:block}
   .pass{color:#0a7a2f} .fail{color:#c11;font-weight:700}
 </style>
 </head>
 <body>
 
-<div id="sky">
-  <div class="cloud c1"></div><div class="cloud c2"></div>
-  <div class="cloud c3"></div><div class="cloud c4"></div>
-  <div id="field"></div>
+<div id="stage">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+
+  <div class="pane on" id="pBalloon"><div id="field" style="position:absolute;inset:0"></div></div>
+
+  <div class="pane" id="pForm">
+    <div class="card">
+      <div class="q" id="fq">—</div>
+      <div class="big ar" id="fshow">—</div>
+      <div class="opts" id="fopts"></div>
+    </div>
+  </div>
+
+  <div class="pane" id="pJoin">
+    <div class="card">
+      <div class="q" id="jq">—</div>
+      <div class="steps ar" id="jsteps"></div>
+      <div class="q" id="jhint" style="opacity:.6">tap to build it up</div>
+    </div>
+  </div>
+
   <div id="report"></div>
   <div id="tests"></div>
 </div>
 
 <div id="bar">
-  <label>Level
+  <label>Student
+    <input type="text" id="who" placeholder="name" maxlength="16">
+  </label>
+  <label>Lesson &amp; level
     <select id="level"></select>
   </label>
-  <label>Rise time <span class="val" id="riseV">8s</span>
-    <input type="range" id="rise" min="3" max="15" step="1" value="8">
+  <span class="page" id="page">p—</span>
+  <label id="lRise">Rise <span class="val" id="riseV">8s</span>
+    <input type="range" id="rise" min="3" max="20" step="1" value="8">
   </label>
-  <label>Spawn gap <span class="val" id="gapV">3.0s</span>
-    <input type="range" id="gap" min="0.5" max="6" step="0.5" value="3">
+  <label id="lGap">Gap <span class="val" id="gapV">3.0s</span>
+    <input type="range" id="gap" min="0.5" max="8" step="0.5" value="3">
   </label>
   <button id="play">Start</button>
   <button id="reset" class="ghost">Reset</button>
-  <div id="micbox">
-    <button id="mic" class="ghost">🎤 Mic off</button>
-    <div id="meterwrap"><div id="meter"></div></div>
-    <span id="heard"></span>
-  </div>
+  <button id="rep" class="ghost">Report</button>
   <div class="score"><span class="ok" id="hits">0</span><span class="bad" id="miss">0</span></div>
-</div>
-
-<div id="cal">
-  <div class="card">
-    <h2>Calibrating to this voice</h2>
-    <p>Say each one out loud. It listens by itself — no clicking.</p>
-    <div class="calglyph" id="calGlyph">بَ</div>
-    <div class="calmsg" id="calMsg">get ready…</div>
-    <button id="calCancel" class="ghost">Cancel</button>
-  </div>
+  <div class="teach" id="teach"></div>
 </div>
 
 <script>
 /* ==========================================================================
-   LEVEL CONTENT — edit here. Everything below this block is game plumbing.
-   Each level is { n, name, items:[strings] }.
+   CONTENT — transcribed from Qaidah (تعليم القرآن، الجزء الاول), pages 1-35.
+   Nothing here is invented. Each block names its book page.
+   To edit content you only need this block; the engine is below it.
    ========================================================================== */
 
-const F='َ', K='ِ', D='ُ',            // zabar, zer, pesh
-      FN='ً', DN='ٌ', KN='ٍ',          // tanween
-      SH='ّ', SK='ْ';                       // tashdeed, jazm
+const F = '\u064E', K = '\u0650', D = '\u064F';        // zabar, zer, pesh
+const ZWJ = '\u200D';                                   // forces a joining form
 
-// 29 huroof in Qaida order
-const BASE = [...'ابتثجحخدذرزسشصضطظعغفقكلمنوهءي'];
-// consonants that take a sukoon / follow a madd (excludes alif + hamza)
-const CONS = BASE.filter(l => l !== 'ا' && l !== 'ء');
+// p1 - الحروف المفردة. 28 letters: no standalone hamza, and ى (not ي) last.
+const LETTERS = ["ا", "ب", "ت", "ث", "ج", "ح", "خ", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ك", "ل", "م", "ن", "و", "ه", "ى"];
+const NAMES   = ["Alif", "Baa", "Taa", "Thaa", "Jeem", "Haa (حاء)", "Khaa", "Daal", "Dhaal", "Raa", "Zaay", "Seen", "Sheen", "Saad", "Daad", "Toa", "Zoa", "Ain", "Ghain", "Faa", "Qaaf", "Kaaf", "Laam", "Meem", "Noon", "Waaw", "Haa (هاء)", "Yaa"];
+const AR_NAMES= ["الف", "باء", "تاء", "ثاء", "جيم", "حاء", "خاء", "دال", "ذال", "راء", "زاي", "سين", "شين", "صاد", "ضاد", "طاء", "ظاء", "عين", "غين", "فاء", "قاف", "كاف", "لام", "ميم", "نون", "واو", "هاء", "ياء"];
 
-const LEVELS = [
-  { n:1,  name:'1 — Huroof (letter names)', items: BASE },
-  { n:2,  name:'2 — Zabar (Fatha)',         items: BASE.map(l => l + F) },
-  { n:3,  name:'3 — Zer (Kasra)',           items: BASE.map(l => l + K) },
-  { n:4,  name:'4 — Pesh (Damma)',          items: BASE.map(l => l + D) },
-  // The only level where the VOWEL is the variable rather than the letter -
-  // which is exactly what the mic can judge, so it is the only mic level.
-  { n:5,  name:'5 — Mixed harakat (zabar / zer / pesh)', mic:true,
-          items: BASE.flatMap(l => [l+F, l+K, l+D]) },
-  { n:6,  name:'6 — Tanween (do-zabar / do-zer / do-pesh)',
-          items: BASE.flatMap(l => [l+FN, l+KN, l+DN]) },
-  { n:7,  name:'7 — Jazm (Sukoon)',
-          items: CONS.map(l => 'أ'+F + l + SK)
-                 .concat(['ب','ت','د'].flatMap(l => ['إ'+K + l + SK, 'أ'+D + l + SK])) },
-  { n:8,  name:'8 — Tashdeed (Shadda)',
-          items: CONS.map(l => 'أ'+F + l + SH + F)
-                 .concat(['رَبَّ','حَجَّ','مَدَّ','شَدَّ']) },
-  { n:9,  name:'9 — Madd (long vowels)',
-          items: [...'بتجدرسكلمن'].flatMap(l => [l+F+'ا', l+K+'ي', l+D+'و']) },
-  { n:10, name:'10 — Two-letter joins',
-          items: ['بَتَ','تَبِ','ثَجُ','جَحَ','حَخِ','خَدُ','دَذَ','ذَرِ','رَزُ','زَسَ',
-                  'سَشِ','شَصُ','صَضَ','ضَطِ','طَظُ','ظَعَ','عَغِ','غَفُ','فَقَ','قَكِ',
-                  'كَلُ','لَمَ','مَنِ','نَهُ','هَوَ','وَيِ','يَبُ','بِتَ','تُثَ','جِحَ'] },
-  { n:11, name:'11 — Three-letter joins',
-          items: ['كَتَبَ','ذَهَبَ','نَصَرَ','فَتَحَ','عَلِمَ','حَسِبَ','سَمِعَ','شَرِبَ','جَلَسَ','خَرَجَ',
-                  'دَخَلَ','رَجَعَ','قَعَدَ','ضَرَبَ','طَلَبَ','ظَهَرَ','غَفَرَ','فَعَلَ','قَتَلَ','كَسَبَ',
-                  'لَعِبَ','مَنَعَ','نَظَرَ','هَبَطَ','وَعَدَ','يَسَرَ','بَعَثَ','ثَقُلَ','صَبَرَ','زَرَعَ'] },
-  { n:12, name:'12 — Four-letter joins',
-          items: ['يَكْتُبُ','يَذْهَبُ','يَعْلَمُ','يَنْصُرُ','يَفْتَحُ','يَجْلِسُ','يَخْرُجُ','يَدْخُلُ','يَرْجِعُ',
-                  'يَضْرِبُ','يَطْلُبُ','يَظْهَرُ','يَغْفِرُ','يَفْعَلُ','يَقْتُلُ','يَكْسِبُ','يَلْعَبُ','يَمْنَعُ',
-                  'يَنْظُرُ','يَسْمَعُ','يَشْرَبُ','مَسْجِدْ','مَكْتَبْ','مُسْلِمْ','أَحْمَدْ'] },
+// p20/25/30 - letters marked (*) are مفخم (جاڑو), read heavy
+const HEAVY = ["خ", "ر", "ص", "ض", "ط", "ظ", "غ", "ق"];
+// p17-18 - حروف القطع: join to the letter BEFORE, never the one AFTER
+const QAT   = ["ا", "د", "ذ", "ر", "ز", "و"];
+
+// p6-10 - بے حرفي: [letter, letter-at-start, letter-at-end]
+const PAIRS = [["ب", "به", "هب"], ["ت", "تم", "بت"], ["ث", "ثم", "بث"], ["ج", "جن", "حج"], ["ح", "حب", "شح"], ["خ", "خل", "مخ"], ["س", "سب", "حس"], ["ش", "شك", "هش"], ["ص", "صن", "نص"], ["ض", "ضم", "مض"], ["ط", "طل", "قط"], ["ظ", "ظن", "حظ"], ["ع", "عش", "مع"], ["غ", "غب", "كغ"], ["ف", "فى", "عف"], ["ق", "قل", "شق"], ["ك", "كم", "يك"], ["ل", "له", "كل"], ["م", "من", "ضم"], ["ن", "نم", "عن"], ["ه", "هم", "طه"], ["ى", "يم", "بى"]];
+
+// p11-16 - تين حرفي: [letter, شروع ما, وسط ما, اخر ما]
+const W3 = [["ب", "بيت", "ثبت", "شعب"], ["ت", "تين", "ختم", "بنت"], ["ث", "ثبت", "مثل", "حيث"], ["ج", "جمل", "عجل", "ثلج"], ["ح", "حبط", "لحم", "ملح"], ["خ", "خطب", "بخل", "نفخ"], ["س", "سبت", "عسل", "ليس"], ["ش", "شطب", "مشى", "محش"], ["ص", "صحف", "بصل", "قصص"], ["ض", "ضلع", "غضب", "بعض"], ["ط", "طفل", "حطة", "مشط"], ["ظ", "ظلم", "عظم", "حفظ"], ["ع", "علم", "لعن", "تبع"], ["غ", "غيب", "شغب", "بلغ"], ["ف", "فلم", "نفس", "ملف"], ["ق", "قلب", "نقص", "خلق"], ["ك", "كتب", "بكم", "فلك"], ["ل", "لهم", "كلم", "فضل"], ["م", "منك", "عمل", "كتم"], ["ن", "نحن", "كنت", "بين"], ["ه", "همل", "مهل", "سفه"], ["ى", "يلج", "بيت", "بغى"]];
+
+// p17-18 - words showing where the قطع letters break the join
+const QAT_WORDS = ["كان", "دين", "حمد", "حدث", "ذلك", "ريب", "نظر", "رطب", "مرض", "غير", "وطد", "يوم", "فوم", "فهو", "دثر", "ثرد", "طرد", "حرد", "دون", "زاد"];
+
+// p21-24 - زبر تمرين. Every harakat in these is fatha.
+const ZABAR = ["أَخَذَ", "مَثَلَ", "جَمَعَ", "رَجَعَ", "ضَرَبَ", "كَشَفَ", "نَظَرَ", "عَزَمَ", "صَبَرَ", "نَكَصَ", "بَدَأَ", "كَذَبَ", "فَرَضَ", "نَزَلَ", "عَبَسَ", "سَلَفَ", "فَصَلَ", "مَنَعَ", "شَرَحَ", "ذَهَبَ", "تَرَكَ", "خَتَمَ", "جَعَلَ", "صَدَقَ", "سَأَلَ", "بَرَزَ", "كَسَبَ", "بَسَطَ", "أَكَلَ", "كَتَبَ", "حَكَمَ", "لَعَنَ", "شَرَعَ", "طَبَعَ", "وَقَعَ", "صَرَفَ", "ذَرَأَ", "سَكَتَ", "بَعَثَ", "وَجَدَ", "أَحَدَ", "نَبَذَ", "حَسَدَ", "دَخَلَ", "فَتَحَ", "فَغَفَرَ", "قَتَلَ", "مَرَجَ"];
+// p26-29 - زير تمرين. Fatha + kasra mixed; kasra is the new mark (red).
+const ZER = ["فَرِحَ", "كَرِهَ", "لَبِثَ", "خَسِرَ", "غَضِبَ", "شَرِبَ", "وَسِعَ", "سَخِرَ", "يَئِسَ", "نَسِيَ", "شَهِدَ", "سَفِهَ", "فَلِمَ", "فَبِمَ", "وَلِىَ", "وَمِنَ", "تَبِعَ", "سَمِعَ", "بَرِقَ", "عَلِمَ", "رَضِىَ", "لَعِبَ", "أَذِنَ", "خَشِىَ", "يَشَإِ", "أَثَرِ", "عَهِدَ", "بَدَتِ", "عَمِلَ", "بَخِلَ", "سَعِدَ", "غَسَقِ", "قِبَلَكَ", "تَبِعَكَ", "بِبَدَنِكَ", "لِخَزَنَةِ", "شِيَةَ", "قِبَلَ", "عِوَجِ", "شِيَعِ", "وَقَعَتِ", "بَلَغَتِ", "وَعَنَتِ", "كَمَثَلِ", "عَشَرَةِ", "أَزِفَتِ", "بِعِصَمِ", "لَنَفِدَ"];
+// p31-35 - پيش تمرين. Damma is the new mark (red). Last rows are two-word items.
+const PESH = ["وَهُوَ", "أُذِنَ", "مَثَلُ", "تَذَرُ", "أَحَدُ", "تَزِرُ", "أُفِكَ", "خَبُثَ", "كُتِبَ", "تُطِعْ", "أَجِدُ", "يَهَبُ", "تَجِدُ", "ذُبِحَ", "حُشِرَ", "حَسُنَ", "وُضِعَ", "بُهِتَ", "نُرِىَ", "يَرِثُ", "هُدِىَ", "نُقِرَ", "سُقِطَ", "سُئِلَ", "قُرِئَ", "تَصِفُ", "رُسُلُ", "تَصِلُ", "حَصَبُ", "يَكُنِ", "كِبَرُ", "سُبُلِ", "يُهِنِ", "ذُكِرَ", "وَنُرِىَ", "وَوُضِعَ", "لَقُضِىَ", "وَنَذَرُ", "وَنَضَعُ", "وَيَهَبُ", "وَحَسُنَ", "وَمَثَلُ", "ءَأَلِدُ", "فَطُبِعَ", "فَبُهِتَ", "كَلِمَتُ", "وَفُتِحَتِ", "لَأَجِدُ", "أَحَدَهُمُ", "عَضُدَكَ", "فَبَصَرُكَ", "أَعِظُكَ", "غُلِبَتِ", "عَمَلُكَ", "جَعَلَ لَكُمُ", "عُمُرِكَ", "وَجُمِعَ", "حَضَرَ أَحَدَكُمُ", "فَهُوَ يَصِلُ"];
+
+// A vowelled alif is written أ (إ under kasra), as the book prints it on p20/25/30.
+const vowelled = (l, m) => (l === 'ا' ? (m === K ? 'إ' : 'أ') : l) + m;
+const JOINING = LETTERS.filter(l => !QAT.includes(l));   // the 22 that join both ways
+
+const LESSONS = [
+  { n:1, ar:'حروف الهجاء', latin:'Huroof al-Hijaa', levels:[
+    { id:'1a', ar:'الحروف المفردة', name:'The 28 letters', book:'1', ex:'balloon',
+      rise:8, gap:3, teaches:'Name each letter. Keep ق (qaaf) and ك (kaaf) apart.',
+      items: LETTERS },
+  ]},
+  { n:2, ar:'تركيب الالفاظ', latin:'Tarkeeb al-Alfaaz', levels:[
+    { id:'2a', ar:'احوال الحروف', name:'Letter forms', book:'3-5', ex:'form',
+      teaches:'One letter, four shapes: alone, at the start, in the middle, at the end.' },
+    { id:'2b', ar:'بے حرفي الفاظ', name:'Two-letter joins', book:'6-10', ex:'join',
+      teaches:'Name both letters, then read them joined.' },
+    { id:'2c', ar:'تين حرفي الفاظ', name:'Three-letter words', book:'11-16', ex:'join',
+      teaches:'The red letter sits at the start, the middle or the end.' },
+    { id:'2d', ar:'حروف القطع', name:'Letters that do not join', book:'17-18', ex:'qat',
+      teaches:'ا د ذ ر ز و join to the letter before them, never to the one after.' },
+  ]},
+  { n:3, ar:'الحروف المتحركة', latin:'Al-Huroof al-Mutaharrikah', levels:[
+    { id:'3a', ar:'الحروف المفتوحة', name:'Zabar (Fatha) - letters', book:'20', ex:'balloon',
+      rise:8, gap:3, heavy:true, teaches:'Every letter with zabar. Starred letters are heavy.',
+      items: LETTERS.map(l => vowelled(l, F)) },
+    { id:'3b', ar:'زبر تمرين', name:'Zabar words', book:'21-24', ex:'balloon', red:F,
+      rise:10, gap:4, teaches:'Three-letter words where every mark is zabar.', items: ZABAR },
+    { id:'3c', ar:'الحروف المكسورة', name:'Zer (Kasra) - letters', book:'25', ex:'balloon',
+      rise:8, gap:3, heavy:true, teaches:'Every letter with zer.',
+      items: LETTERS.map(l => vowelled(l, K)) },
+    { id:'3d', ar:'زير تمرين', name:'Zer words', book:'26-29', ex:'balloon', red:K,
+      rise:11, gap:4, teaches:'Zabar and zer together. The red mark is the zer.', items: ZER },
+    { id:'3e', ar:'الحروف المضمومة', name:'Pesh (Damma) - letters', book:'30', ex:'balloon',
+      rise:8, gap:3, heavy:true, teaches:'Every letter with pesh.',
+      items: LETTERS.map(l => vowelled(l, D)) },
+    { id:'3f', ar:'پيش تمرين', name:'Pesh words', book:'31-35', ex:'balloon', red:D,
+      rise:12, gap:4.5, teaches:'Pesh in red. The last few are two words together.',
+      items: PESH },
+  ]},
 ];
 
-// used only in the miss report, to name what was missed
-const NAMES = {'ا':'Alif','ب':'Ba','ت':'Ta','ث':'Tha','ج':'Jeem','ح':'Ha (haa)','خ':'Kha',
-  'د':'Dal','ذ':'Dhal','ر':'Ra','ز':'Za','س':'Seen','ش':'Sheen','ص':'Saad','ض':'Daad',
-  'ط':'Toa','ظ':'Zoa','ع':'Ain','غ':'Ghain','ف':'Fa','ق':'Qaf','ك':'Kaf','ل':'Lam',
-  'م':'Meem','ن':'Noon','و':'Waw','ه':'Ha (hay)','ء':'Hamza','ي':'Ya'};
-
 /* ==========================================================================
-   GAME
+   ENGINE
    ========================================================================== */
-
-const COLORS = ['#eb8fd4','#a9e05f','#f3e14f','#d9dee4','#8fd0f5','#f7a85c','#c3a6f0','#7fdcc0'];
 const $ = id => document.getElementById(id);
-const field=$('field'), report=$('report');
+const COLORS = ['#eb8fd4','#a9e05f','#f3e14f','#d9dee4','#8fd0f5','#f7a85c','#c3a6f0','#7fdcc0'];
+const HARAKAT = /[ً-ْٰ]/g;
+const IS_MARK = /[ً-ْٰ]/;      // non-global: .test() on a /g regex is stateful
+const bare = s => s.replace(HARAKAT, '');
+const pick = a => a[Math.random() * a.length | 0];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random()*(i+1)|0;
+                         [a[i],a[j]] = [a[j],a[i]]; } return a; };
 
-let hits=0, missed=0, running=false, timer=null, bag=[], missLog=new Map();
+const FLAT = LESSONS.flatMap(L => L.levels.map(v => ({...v, lesson:L})));
+const level = () => FLAT[$('level').selectedIndex];
 
-const level = () => LEVELS[$('level').selectedIndex];
+let hits = 0, missed = 0, running = false, timer = null, bag = [], missLog = new Map();
 
-// Fisher-Yates: deal the whole level before repeating anything
-function nextItem(){
-  if(!bag.length){
-    bag = level().items.slice();
-    for(let i=bag.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [bag[i],bag[j]]=[bag[j],bag[i]]; }
+/* ---------- letter forms, via ZWJ: the font shapes them, we hardcode nothing ---------- */
+// ى is written as ي at the start and in the middle — alif maqsura only exists
+// word-finally. That is exactly the row the book prints for it on p5, and the
+// font's own shaper gives a DOTLESS tooth for U+0649, which would be wrong.
+const asMedial = l => l === 'ى' ? 'ي' : l;
+const FORM = { iso: l => l,
+               init: l => asMedial(l) + ZWJ,
+               med:  l => ZWJ + asMedial(l) + ZWJ,
+               fin:  l => ZWJ + l };
+const sameLetter = (a, b) => asMedial(a) === asMedial(b);
+const POS  = [['init','at the start','شروع ما'], ['med','in the middle','درميان ما'],
+              ['fin','at the end','اخر ما']];
+
+/* ---------- red marks: the book prints the newly-taught harakat in red ---------- */
+// The book colours the mark alone. A browser cannot: a combining mark is composed
+// into the base letter's glyph and takes the BASE's colour, so a <span> around just
+// the mark computes red and still paints black (verified). So colour the whole
+// cluster - the letter that carries the new mark goes red with it.
+function paint(word, mark) {
+  if (!mark) return word;
+  const out = [];
+  for (const ch of word) {
+    if (IS_MARK.test(ch) && out.length) out[out.length - 1] += ch;
+    else out.push(ch);
   }
-  return bag.pop();
+  return out.map(c => c.includes(mark) ? `<span class="red">${c}</span>` : c).join('');
 }
 
-// harakat are combining marks — strip them to count actual letters
-const letterCount = s => s.replace(/[ً-ٓ]/g,'').length;
-
-let ac;
-function blip(){
-  try{
-    ac ||= new (window.AudioContext||window.webkitAudioContext)();
-    const t=ac.currentTime, o=ac.createOscillator(), g=ac.createGain();
-    o.connect(g); g.connect(ac.destination);
-    o.frequency.setValueAtTime(760,t); o.frequency.exponentialRampToValueAtTime(170,t+.12);
-    g.gain.setValueAtTime(.22,t);      g.gain.exponentialRampToValueAtTime(.001,t+.15);
-    o.start(t); o.stop(t+.16);
-  }catch(e){/* audio blocked — game still works */}
-}
-
-function spawn(){
-  const item = nextItem();
-  const n = letterCount(item);
-  const w = Math.min(innerWidth*0.42, n>3 ? 230 : n>1 ? 195 : 155);
-  const fs = n>3 ? 0.26 : n>2 ? 0.32 : n>1 ? 0.42 : 0.56;
-
-  const rise=document.createElement('div');
-  rise.className='rise';
-  rise.dataset.vowel = vowelOf(item) || '';
-  rise.style.left = (6 + Math.random()*76) + '%';
-  rise.style.animationDuration = $('rise').value + 's';
-
-  const sway=document.createElement('div');
-  sway.className='sway';
-  sway.style.animationDuration = (2.8 + Math.random()*1.6) + 's';
-
-  const b=document.createElement('div');
-  b.className='balloon';
-  b.style.setProperty('--w', w+'px');
-  b.style.setProperty('--fs', fs);
-  b.style.setProperty('--c', COLORS[Math.random()*COLORS.length|0]);
-  b.innerHTML = '<span class="item" lang="ar" dir="rtl"></span><span class="string"></span>';
-  b.querySelector('.item').textContent = item;
-
-  b.addEventListener('click', () => {
-    if(rise.dataset.done) return;
-    rise.dataset.done='1';
-    hits++; $('hits').textContent=hits; blip();
-    b.classList.add('popped');
-    setTimeout(()=>rise.remove(),200);
-  });
-
-  rise.addEventListener('animationend', e => {
-    if(e.animationName!=='rise' || rise.dataset.done) return;   // ignore sway/pop
-    rise.dataset.done='1';
-    missed++; $('miss').textContent=missed;
-    missLog.set(item,(missLog.get(item)||0)+1);
-    rise.remove();
-  });
-
-  sway.appendChild(b); rise.appendChild(sway); field.appendChild(rise);
-}
-
-function loop(){
-  if(!running) return;
-  spawn();
-  timer = setTimeout(loop, $('gap').value*1000);
-}
-
-function setRunning(on){
-  running = on;
-  field.classList.toggle('paused', !on);
-  $('play').textContent = on ? 'Pause' : (field.children.length ? 'Resume' : 'Start');
-  clearTimeout(timer);
-  if(on){ report.classList.remove('show'); loop(); }
-  else showReport();
-}
-
-function showReport(){
-  const rows=[...missLog.entries()].sort((a,b)=>b[1]-a[1]);
-  report.innerHTML = '<h2>Missed — drill these</h2>' + (rows.length
-    ? '<ul>' + rows.map(([it,c]) =>
-        `<li><span class="g">${it}</span><span class="n">${NAMES[it]?NAMES[it]+' · ':''}${c}×</span></li>`
-      ).join('') + '</ul>'
-    : '<p class="empty">Nothing missed yet. ✓</p>');
-  report.classList.add('show');
-}
-
-function reset(){
-  setRunning(false);
-  field.innerHTML=''; bag=[]; missLog.clear();
-  hits=missed=0; $('hits').textContent=0; $('miss').textContent=0;
-  report.classList.remove('show');
-  $('play').textContent='Start';
-}
-
-// wiring
-$('level').innerHTML = LEVELS.map(l=>`<option>${l.name}</option>`).join('');
-$('level').onchange = () => { reset(); syncMicButton(); };
-$('play').onclick   = () => setRunning(!running);
-$('reset').onclick  = reset;
-$('rise').oninput   = e => $('riseV').textContent = e.target.value + 's';
-$('gap').oninput    = e => $('gapV').textContent  = (+e.target.value).toFixed(1) + 's';
-addEventListener('keydown', e => {
-  if(e.code==='Space' && !/INPUT|SELECT|BUTTON/.test(e.target.tagName)){ e.preventDefault(); setRunning(!running); }
-});
-
-
-/* ==========================================================================
-   MIC AUTO-POP  (mixed-harakat level only)
-
-   Validated offline on 30 real recordings before any of this was written:
-   coarse log-spaced FFT bands + nearest centroid scored 30/30 separating
-   zabar/zer/pesh. No model, no network - audio never leaves this device.
-
-   It calibrates to whoever is speaking, which is the point: a child's formants
-   sit far above an adult's, so fixed thresholds would fail. It judges the VOWEL
-   only. It cannot tell you the consonant was right, which is exactly why this
-   is the one level it runs on - here the vowel IS the variable.
-   ========================================================================== */
-const VOWELS = [['a','Zabar','بَ'], ['i','Zer','بِ'], ['u','Pesh','بُ']];
-const NBANDS = 24, FLO = 200, FHI = 4000;
-const MARK = {'\u064E':'a', '\u0650':'i', '\u064F':'u'};
-
-let mac, analyser, freqBuf, timeBuf, bands = [], micOn = false, micRAF = null;
-let centroids = null, utt = null, calWaiter = null;
-
-const vowelOf = it => { for(const m in MARK) if(it.includes(m)) return MARK[m]; return null; };
-
-try {                                    // a previous calibration, if any
-  const c = JSON.parse(localStorage.getItem('bq_centroids') || 'null');
-  if (c) centroids = Object.fromEntries(Object.entries(c).map(([k,v]) => [k, Float32Array.from(v)]));
-} catch(e) { /* private window, blocked storage - just recalibrate */ }
-
-function buildBands(){                   // precompute bin ranges once, not per frame
-  const sr = mac.sampleRate, n = analyser.frequencyBinCount;
-  bands = [];
-  for(let b = 0; b < NBANDS; b++){
-    const lo = FLO * Math.pow(FHI/FLO, b/NBANDS), hi = FLO * Math.pow(FHI/FLO, (b+1)/NBANDS);
-    bands.push([Math.max(0, Math.floor(lo*2*n/sr)), Math.min(n, Math.ceil(hi*2*n/sr))]);
-  }
-}
-
-function spectrum(){
-  analyser.getFloatFrequencyData(freqBuf);          // dB
-  const out = new Float32Array(NBANDS);
-  for(let b = 0; b < NBANDS; b++){
-    const [i0, i1] = bands[b];
-    let sum = 0, cnt = 0;
-    for(let i = i0; i < i1; i++){ sum += Math.pow(10, freqBuf[i]/20); cnt++; }   // dB -> linear
-    out[b] = Math.log((cnt ? sum/cnt : 1e-9) + 1e-9);                            // log(mean(mag))
-  }
-  let m = 0; for(const v of out) m += v; m /= NBANDS;
-  let sd = 0; for(const v of out) sd += (v-m)*(v-m); sd = Math.sqrt(sd/NBANDS) || 1;
-  for(let b = 0; b < NBANDS; b++) out[b] = (out[b]-m)/sd;   // normalise away gain/loudness
+/* ---------- حروف القطع: break a word where a qat' letter refuses to join left ---------- */
+function qatGroups(word) {
+  const out = []; let cur = '';
+  for (const ch of word) { cur += ch; if (QAT.includes(ch)) { out.push(cur); cur = ''; } }
+  if (cur) out.push(cur);
   return out;
 }
 
-function micRms(){
-  analyser.getByteTimeDomainData(timeBuf);
-  let s = 0;
-  for(const v of timeBuf){ const d = (v-128)/128; s += d*d; }
-  return Math.sqrt(s/timeBuf.length);
+/* ---------- scoring, shared by every exercise ---------- */
+function score(ok, item) {
+  if (ok) { hits++; blip(); }
+  else { missed++; missLog.set(item, (missLog.get(item) || 0) + 1); }
+  $('hits').textContent = hits; $('miss').textContent = missed;
+  saveProgress();
 }
 
-function micTick(){
-  micRAF = requestAnimationFrame(micTick);
-  const r = micRms();
-  $('meter').style.width = Math.min(100, r*350) + '%';
-  if(level().mic && running) markTarget();
-  if(r > 0.055){                                    // speaking
-    if(!utt) utt = {peak:0, spec:null, quiet:0};
-    utt.quiet = 0;
-    if(r > utt.peak){ utt.peak = r; utt.spec = spectrum(); }   // keep the loudest frame
-  } else if(utt && ++utt.quiet > 6){                // ~100ms of silence ends it
-    const u = utt; utt = null;
-    if(u.spec && u.peak > 0.075) onUtterance(u.spec);
-  }
-}
-
-function classify(spec){
-  if(!centroids) return null;
-  const d = {};
-  for(const k in centroids){
-    let s = 0;
-    for(let i = 0; i < NBANDS; i++){ const x = spec[i] - centroids[k][i]; s += x*x; }
-    d[k] = Math.sqrt(s);
-  }
-  const order = Object.keys(d).sort((a,b) => d[a]-d[b]);
-  // Nearest-centroid always names a winner. Demand a margin, or a mumble pops
-  // a balloon and the child learns nothing.
-  if(d[order[0]] / (d[order[1]] || 1) > 0.80) return null;
-  return order[0];
-}
-
-// The balloon being read: highest on screen, so closest to escaping.
-function currentTarget(){
-  let best = null, top = Infinity;
-  for(const el of field.children){
-    if(el.dataset.done) continue;
-    const t = el.getBoundingClientRect().top;
-    if(t < top){ top = t; best = el; }
-  }
-  return best;
-}
-
-function markTarget(){
-  const t = currentTarget();
-  for(const el of field.children) el.classList.toggle('target', el === t);
-}
-
-const glyphOf = v => (VOWELS.find(x => x[0] === v) || [])[2] || '—';
-
-function onUtterance(spec){
-  if(calWaiter){ const f = calWaiter; calWaiter = null; f(spec); return; }
-  const v = classify(spec);
-  if(!running || !level().mic){ $('heard').textContent = glyphOf(v); return; }
-
-  // Judge ONLY the target balloon. Searching every balloon for a match meant
-  // that with 3 vowels mixed on screen, almost any sound found something to pop
-  // - about an 80% false-pop rate with four balloons up, which is what it felt
-  // like: "anything I say pops something".
-  const target = currentTarget();
-  if(!target) return;
-  const need = target.dataset.vowel;
-  $('heard').innerHTML = v
-    ? `${glyphOf(v)}<span class="vs">${v === need ? '✓' : '→ ' + glyphOf(need)}</span>`
-    : `<span class="no">unclear</span>`;
-  if(v && v === need){
-    target.querySelector('.balloon').click();
-  } else if(v){
-    target.classList.add('wrong');                 // say it again, no penalty
-    setTimeout(() => target.classList.remove('wrong'), 450);
-  }
-}
-
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const nextUtterance = () => new Promise(r => calWaiter = r);
-
-async function calibrate(){
-  $('cal').classList.add('show');
-  const takes = {a:[], i:[], u:[]};
+let ac;
+function blip() {
   try {
-    for(let rep = 0; rep < 2; rep++){
-      for(let i = 0; i < VOWELS.length; i++){
-        const [k, name, glyph] = VOWELS[i];
-        $('calGlyph').textContent = glyph;
-        $('calMsg').textContent = `say it — ${name}  (${rep*3+i+1} of 6)`;
-        const spec = await nextUtterance();
-        if(!micOn) return;                       // cancelled mid-way
-        takes[k].push(spec);
-        $('calMsg').textContent = 'got it ✓';
-        await sleep(450);
-      }
-    }
-    centroids = {};
-    for(const k in takes){
-      const m = new Float32Array(NBANDS);
-      for(const t of takes[k]) for(let i = 0; i < NBANDS; i++) m[i] += t[i]/takes[k].length;
-      centroids[k] = m;
-    }
-    // Separation check. Weak calibration is indistinguishable from a broken
-    // mic once you are playing, so say so now rather than let them wonder.
-    const dist = (a,b) => { let t=0; for(let i=0;i<NBANDS;i++){const d=a[i]-b[i]; t+=d*d;} return Math.sqrt(t); };
-    const keys = Object.keys(centroids);
-    let between = Infinity, within = 0;
-    for(let i=0;i<keys.length;i++){
-      for(let j=i+1;j<keys.length;j++) between = Math.min(between, dist(centroids[keys[i]], centroids[keys[j]]));
-      for(const t of takes[keys[i]]) within = Math.max(within, dist(t, centroids[keys[i]]));
-    }
-    const ratio = between / (within || 1e-9);
-    if(ratio < 1.3){
-      alert(`Calibration looks weak (separation ${ratio.toFixed(1)}, want 1.3+).\n\n`
-          + `The three vowels did not come out distinct. Try again: somewhere quiet, `
-          + `close to the laptop, and exaggerate the difference - baaa, beee, booo.`);
-    }
-    try {
-      localStorage.setItem('bq_centroids', JSON.stringify(
-        Object.fromEntries(Object.entries(centroids).map(([k,v]) => [k, [...v]]))));
-    } catch(e) { /* not fatal - it just won't survive a reload */ }
-  } finally {
-    calWaiter = null;
-    $('cal').classList.remove('show');
+    ac ||= new (window.AudioContext || window.webkitAudioContext)();
+    const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.frequency.setValueAtTime(760, t); o.frequency.exponentialRampToValueAtTime(170, t + .12);
+    g.gain.setValueAtTime(.22, t);      g.gain.exponentialRampToValueAtTime(.001, t + .15);
+    o.start(t); o.stop(t + .16);
+  } catch (e) { /* audio blocked - game still works */ }
+}
+
+/* ---------- deal the whole level before repeating anything ---------- */
+function nextItem(list) {
+  if (!bag.length) bag = shuffle(list.slice());
+  return bag.pop();
+}
+
+/* ==========================================================================
+   EXERCISE 1 - BALLOON   (p1, p20-35)
+   ========================================================================== */
+function spawn() {
+  const lv = level(), item = nextItem(lv.items);
+  const n = bare(item).replace(/\s/g, '').length;
+  const w = Math.min(innerWidth * 0.44, n > 5 ? 260 : n > 3 ? 230 : n > 1 ? 195 : 155);
+  const fs = n > 5 ? 0.20 : n > 3 ? 0.25 : n > 2 ? 0.31 : n > 1 ? 0.40 : 0.54;
+
+  const rise = document.createElement('div');
+  rise.className = 'rise';
+  rise.style.left = (5 + Math.random() * 74) + '%';
+  rise.style.animationDuration = $('rise').value + 's';
+
+  const sway = document.createElement('div');
+  sway.className = 'sway';
+  sway.style.animationDuration = (2.8 + Math.random() * 1.6) + 's';
+
+  const b = document.createElement('div');
+  b.className = 'balloon';
+  b.style.setProperty('--w', w + 'px');
+  b.style.setProperty('--fs', fs);
+  b.style.setProperty('--c', pick(COLORS));
+  // p20/25/30 mark 8 letters with (*) — read مفخم (heavy)
+  const heavy = lv.heavy && HEAVY.includes(bare(item)[0]);
+  b.innerHTML = `<span class="item ar" lang="ar">${paint(item, lv.red)}</span>`
+              + (heavy ? '<span class="heavy">جاڑو</span>' : '')
+              + '<span class="string"></span>';
+
+  b.addEventListener('click', () => {
+    if (rise.dataset.done) return;
+    rise.dataset.done = '1';
+    score(true, item);
+    b.classList.add('popped');
+    setTimeout(() => rise.remove(), 200);
+  });
+  rise.addEventListener('animationend', e => {
+    if (e.animationName !== 'rise' || rise.dataset.done) return;
+    rise.dataset.done = '1';
+    score(false, item);
+    rise.remove();
+  });
+  sway.appendChild(b); rise.appendChild(sway); $('field').appendChild(rise);
+}
+
+function loop() { if (!running) return; spawn(); timer = setTimeout(loop, $('gap').value * 1000); }
+
+/* ==========================================================================
+   EXERCISE 2 - FORM MATCH   (p3-5)  self-scoring, no teacher needed
+   ========================================================================== */
+let formQ = null;
+function askForm() {
+  // Position questions only make sense for the 22 letters that join both ways -
+  // for ا د ذ ر ز و the start form and the isolated form are the same glyph.
+  const kind = pick(['whichLetter', 'whichForm', 'whichPos']);
+  const letter = kind === 'whichLetter' ? pick(LETTERS) : pick(JOINING);
+  const [p, en, ar] = pick(POS);
+  let show, opts, right, q;
+
+  if (kind === 'whichLetter') {
+    show = FORM[p](letter);
+    right = letter;
+    opts = shuffle([letter, ...shuffle(LETTERS.filter(l => l !== letter)).slice(0, 3)]);
+    q = 'Which letter is this?';
+  } else if (kind === 'whichForm') {
+    show = letter;
+    right = FORM[p](letter);
+    const others = POS.filter(x => x[0] !== p).map(x => FORM[x[0]](letter));
+    opts = shuffle([right, ...others, FORM.iso(letter)].filter((v, i, a) => a.indexOf(v) === i));
+    q = `How does it look ${en}? (${ar})`;
+  } else {
+    show = FORM[p](letter);
+    right = en;
+    opts = POS.map(x => x[1]);
+    q = 'Where in the word does this shape sit?';
+  }
+  formQ = { right, item: kind === 'whichPos' ? FORM[p](letter) : letter + ' ' + en };
+  $('fq').textContent = q;
+  $('fshow').textContent = show;
+  $('fopts').innerHTML = '';
+  for (const o of opts) {
+    const el = document.createElement('div');
+    el.className = 'opt' + (kind === 'whichPos' ? ' lat' : ' ar');
+    el.textContent = o;
+    el.onclick = () => {
+      if (el.classList.contains('good') || el.classList.contains('bad')) return;
+      const good = o === formQ.right;
+      el.classList.add(good ? 'good' : 'bad');
+      score(good, formQ.item);
+      if (good) setTimeout(askForm, 480);
+    };
+    $('fopts').appendChild(el);
   }
 }
 
-async function micToggle(){
-  if(micOn){
-    micOn = false; cancelAnimationFrame(micRAF); micRAF = null;
-    if(mac) mac.close();
-    mac = null; utt = null; calWaiter = null;
-    $('cal').classList.remove('show');
-    $('mic').textContent = '🎤 Mic off'; $('mic').classList.remove('on');
-    $('meter').style.width = 0; $('heard').textContent = '';
-    return;
+/* ==========================================================================
+   EXERCISE 3 - JOIN   (p6-16)  mirrors the book's separate -> faded -> bold columns
+   ========================================================================== */
+let joinQ = null, joinStep = 0;
+function askJoin() {
+  const lv = level();
+  joinStep = 0;
+  if (lv.id === '2b') {
+    const [letter, atStart, atEnd] = pick(PAIRS);
+    const w = pick([atStart, atEnd]);
+    joinQ = { word: w, letter,
+      label: `${letter} ${w === atStart ? 'شروع ما (at the start)' : 'اخر ما (at the end)'}` };
+  } else {
+    const row = pick(W3), i = 1 + (Math.random() * 3 | 0);
+    joinQ = { word: row[i], letter: row[0],
+      label: `${row[0]} ${['', 'شروع ما (start)', 'وسط ما (middle)', 'اخر ما (end)'][i]}` };
   }
-  let stream;
+  drawJoin();
+}
+function drawJoin() {
+  const { word, letter, label } = joinQ;
+  $('jq').textContent = label;
+  const sep = [...word].join('  ');
+  const cells = [
+    { t: sep,  c: 'shown' },      // letters apart, as the book's first column
+    { t: word, c: 'faded' },      // joined but pale, the book's middle column
+    { t: word, c: 'final' },      // joined and bold, the book's last column
+  ];
+  $('jsteps').innerHTML = cells.map((c, i) =>
+    `<span class="step ${i <= joinStep ? c.c : ''}">${
+       i <= joinStep ? c.t.replace(new RegExp(letter, 'g'),
+            i === 2 ? `<span class="red">${letter}</span>` : letter) : '···'}</span>`
+  ).join('<span class="step shown" style="font-size:28px">→</span>');
+  $('jhint').textContent = joinStep < 2 ? 'tap to join' : 'read it aloud, then mark it';
+  if (joinStep >= 2) {
+    $('jhint').innerHTML =
+      '<button id="jok">Correct</button> <button id="jno" class="ghost">Missed</button>';
+    $('jok').onclick = () => { score(true, word); askJoin(); };
+    $('jno').onclick = () => { score(false, word); askJoin(); };
+  }
+}
+
+/* ==========================================================================
+   EXERCISE 4 - حروف القطع   (p17-18)
+   ========================================================================== */
+let qatQ = null;
+function askQat() {
+  const word = pick(QAT_WORDS);
+  const groups = qatGroups(word);
+  qatQ = { word, groups };
+  const red = w => [...w].map(c => QAT.includes(c) ? `<span class="red">${c}</span>` : c).join('');
+  $('jq').textContent = 'Where does the join break?';
+  $('jsteps').innerHTML =
+    `<span class="step shown">${groups.map(g => `<span class="grp">${red(g)}</span>`).join('')}</span>`
+    + '<span class="step shown" style="font-size:28px">→</span>'
+    + `<span class="step final">${red(word)}</span>`;
+  // A قطع letter at the very end of a word breaks nothing visible - there is
+  // nothing after it. Saying "breaks after ر" for نظر would contradict the screen.
+  const qatIn = [...word].filter(c => QAT.includes(c));
+  const last = word[word.length - 1];
+  const breaks = groups.length > 1;
+  $('jhint').innerHTML =
+    `<div style="margin-bottom:8px">` + (breaks
+      ? `breaks after <b class="ar" style="font-size:22px">`
+        + `${qatIn.filter(c => c !== last || groups.length > 1 && !QAT.includes(last)).join(' ') || qatIn.join(' ')}</b>`
+        + ` — a قطع letter never joins to the next one`
+      : `<b class="ar" style="font-size:22px">${qatIn.join(' ')}</b> is a قطع letter, `
+        + `but nothing follows it here — so the word stays in one piece`)
+    + '</div><button id="jok">Correct</button> <button id="jno" class="ghost">Missed</button>';
+  $('jok').onclick = () => { score(true, word); askQat(); };
+  $('jno').onclick = () => { score(false, word); askQat(); };
+}
+
+/* ==========================================================================
+   STAGE ROUTING
+   ========================================================================== */
+const PANES = { balloon: 'pBalloon', form: 'pForm', join: 'pJoin', qat: 'pJoin' };
+function showPane(ex) {
+  for (const id of new Set(Object.values(PANES))) $(id).classList.toggle('on', PANES[ex] === id);
+  const isBalloon = ex === 'balloon';
+  $('lRise').style.display = $('lGap').style.display = isBalloon ? '' : 'none';
+  $('play').style.display = isBalloon ? '' : 'none';
+}
+
+function setRunning(on) {
+  running = on;
+  $('field').classList.toggle('paused', !on);
+  $('play').textContent = on ? 'Pause' : ($('field').children.length ? 'Resume' : 'Start');
+  clearTimeout(timer);
+  if (on) { $('report').classList.remove('show'); loop(); } else showReport();
+}
+
+function reset() {
+  const lv = level();
+  running = false; clearTimeout(timer);
+  $('field').innerHTML = ''; $('field').classList.remove('paused');
+  bag = []; hits = 0; missed = 0;
+  $('hits').textContent = 0; $('miss').textContent = 0;
+  $('report').classList.remove('show');
+  $('play').textContent = 'Start';
+  $('page').textContent = 'p' + lv.book;
+  $('teach').textContent = `${lv.lesson.ar} · ${lv.ar} — ${lv.teaches}`;
+  if (lv.rise) { $('rise').value = lv.rise; $('riseV').textContent = lv.rise + 's'; }
+  if (lv.gap)  { $('gap').value = lv.gap; $('gapV').textContent = (+lv.gap).toFixed(1) + 's'; }
+  showPane(lv.ex);
+  if (lv.ex === 'form') askForm();
+  if (lv.ex === 'join') askJoin();
+  if (lv.ex === 'qat')  askQat();
+}
+
+/* ==========================================================================
+   STUDENT PROFILES + REPORT
+   ========================================================================== */
+const keyFor = () => 'qaidah:' + ($('who').value.trim().toLowerCase() || '_');
+function saveProgress() {
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: {
-      echoCancellation: false, noiseSuppression: false, autoGainControl: false
-    }});   // AGC would fight the level-based detection and the normalisation
-  } catch(e){
-    $('heard').textContent = ''; $('mic').textContent = '🎤 blocked';
-    alert('Microphone blocked. Allow mic access for this page, then try again.\n\n(' + e.name + ')');
-    return;
+    const all = JSON.parse(localStorage.getItem(keyFor()) || '{}');
+    all[level().id] = { hits, missed, miss: [...missLog.entries()], at: Date.now() };
+    localStorage.setItem(keyFor(), JSON.stringify(all));
+  } catch (e) { /* private window - progress just won't persist */ }
+}
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(keyFor()) || '{}'); } catch (e) { return {}; }
+}
+
+function showReport() {
+  const all = loadProgress();
+  const who = $('who').value.trim() || 'this device';
+  let html = `<h2>${who} — missed items, and the page to reopen</h2>`;
+  let any = false;
+  for (const lv of FLAT) {
+    const rec = all[lv.id];
+    if (!rec || !rec.miss || !rec.miss.length) continue;
+    any = true;
+    const rows = rec.miss.sort((a, b) => b[1] - a[1]);
+    html += `<h3>${lv.lesson.ar} · ${lv.ar} — book p${lv.book} `
+          + `<span style="opacity:.6">(${rec.hits}✓ ${rec.missed}✗)</span></h3><ul>`
+          + rows.map(([it, c]) => {
+              const idx = LETTERS.indexOf(it);
+              const nm = idx >= 0 ? NAMES[idx] + ' · ' : '';
+              return `<li><span class="g ar">${it}</span><span class="n">${nm}${c}×</span></li>`;
+            }).join('') + '</ul>';
   }
-  mac = new (window.AudioContext || window.webkitAudioContext)();
-  analyser = mac.createAnalyser();
-  analyser.fftSize = 2048;
-  analyser.smoothingTimeConstant = 0;
-  mac.createMediaStreamSource(stream).connect(analyser);
-  freqBuf = new Float32Array(analyser.frequencyBinCount);
-  timeBuf = new Uint8Array(analyser.fftSize);
-  buildBands();
-  micOn = true;
-  $('mic').textContent = '🎤 Mic on'; $('mic').classList.add('on');
-  micTick();
-  if(!centroids) await calibrate();
+  $('report').innerHTML = any ? html
+    : `<h2>${who}</h2><p class="empty">Nothing missed yet. ✓</p>`;
+  $('report').classList.add('show');
 }
 
-function syncMicButton(){
-  const ok = !!level().mic;
-  $('mic').disabled = !ok;
-  $('mic').title = ok
-    ? 'Pop balloons by saying the vowel. Click again to turn off.'
-    : 'Mic only works on level 5. Elsewhere every balloon on a level shares '
-      + 'the same vowel, so listening for it would pop anything.';
-}
-
-$('mic').onclick = () => { if(micOn && centroids && !calWaiter) { if(confirm('Recalibrate for a different voice?')) return calibrate(); } micToggle(); };
+/* ---------- wiring ---------- */
+$('level').innerHTML = LESSONS.map(L =>
+  `<optgroup label="${L.n}. ${L.ar} — ${L.latin}">`
+  + L.levels.map(v => `<option>${v.id} · ${v.name} (p${v.book})</option>`).join('')
+  + '</optgroup>').join('');
+$('level').onchange = () => { missLog.clear(); reset(); };
+$('who').onchange   = () => { missLog.clear(); reset(); };
+$('play').onclick   = () => setRunning(!running);
+$('reset').onclick  = () => { missLog.clear(); reset(); };
+$('rep').onclick    = () => $('report').classList.toggle('show');
+$('rise').oninput   = e => $('riseV').textContent = e.target.value + 's';
+$('gap').oninput    = e => $('gapV').textContent = (+e.target.value).toFixed(1) + 's';
+addEventListener('keydown', e => {
+  if (e.code === 'Space' && !/INPUT|SELECT|BUTTON/.test(e.target.tagName)) {
+    e.preventDefault(); if (level().ex === 'balloon') setRunning(!running);
+  }
+});
+try { $('who').value = localStorage.getItem('qaidah:last') || ''; } catch (e) {}
+$('who').addEventListener('input', () => {
+  try { localStorage.setItem('qaidah:last', $('who').value); } catch (e) {}
+});
+reset();
 
 /* ==========================================================================
    SELF-CHECK — open index.html#test
-   Guards the thing that silently breaks: wrong combining marks in the data.
+   Guards the content, which is where a silent error would live: a wrong
+   combining mark looks almost right and teaches the wrong sound.
    ========================================================================== */
-function runSelfTest(){
-  const out=[]; let bad=0;
-  const ok=(c,m)=>{ out.push(`<div class="${c?'pass':'fail'}">${c?'PASS':'FAIL'}  ${m}</div>`); if(!c)bad++; };
+function runSelfTest() {
+  const out = []; let bad = 0;
+  const ok = (c, m) => { out.push(`<div class="${c?'pass':'fail'}">${c?'PASS':'FAIL'}  ${m}</div>`); if(!c) bad++; };
   const cp = s => [...s].length;
+  const marked = s => /[ً-ْ]/.test(s);
 
-  ok(BASE.length===29, `29 huroof (got ${BASE.length})`);
-  ok(CONS.length===27, `27 sukoon-bearing consonants (got ${CONS.length})`);
-  ok(LEVELS.length===12, `12 levels (got ${LEVELS.length})`);
+  ok(LETTERS.length === 28, `book p1 has 28 letters (got ${LETTERS.length})`);
+  ok(!LETTERS.includes('ء'), 'no standalone hamza — the book does not list one');
+  ok(LETTERS[27] === 'ى', `last letter is ى not ي (got ${LETTERS[27]})`);
+  ok(new Set(LETTERS).size === 28, 'letters are unique');
+  ok(NAMES.length === 28 && AR_NAMES.length === 28, 'every letter has both names');
+  ok(NAMES[20] === 'Qaaf' && NAMES[21] === 'Kaaf', 'ق and ك named apart (book p3 footnote)');
+  ok(HEAVY.length === 8 && HEAVY.join('') === 'خرصضطظغق', 'the 8 (*) mufakhkham letters, p20');
+  ok(QAT.length === 6 && QAT.join('') === 'ادذرزو', 'the 6 حروف القطع, p17');
+  ok(JOINING.length === 22, `22 letters join both ways (got ${JOINING.length})`);
 
-  for(const L of LEVELS){
-    ok(L.items.length>=20, `L${L.n} has >=20 items (${L.items.length})`);
-    ok(L.items.every(i=>i && i.trim()), `L${L.n} no empty items`);
-    ok(new Set(L.items).size===L.items.length, `L${L.n} no duplicates`);
-  }
+  ok(PAIRS.length === 22, `p6-10: 22 letters (got ${PAIRS.length})`);
+  ok(PAIRS.every(p => cp(p[1]) === 2 && cp(p[2]) === 2), 'p6-10: every pair is 2 letters');
+  ok(PAIRS.every(p => sameLetter(p[1][0], p[0]) && sameLetter(p[2][1], p[0])),
+     'p6-10: the letter is first in "شروع ما" and last in "اخر ما" (ى counts as ي)');
+  ok(W3.length === 22, `p11-16: 22 letters (got ${W3.length})`);
+  ok(W3.every(r => r.slice(1).every(w => cp(w) === 3)), 'p11-16: every word is 3 letters');
+  ok(W3.every(r => sameLetter(r[1][0], r[0]) && sameLetter(r[3][2], r[0])),
+     'p11-16: target letter starts the "شروع ما" word and ends the "اخر ما" word');
+  ok(QAT_WORDS.length === 20, `p17-18: 20 words (got ${QAT_WORDS.length})`);
+  ok(QAT_WORDS.every(w => [...w].some(c => QAT.includes(c))),
+     'p17-18: every word actually contains a قطع letter');
+  ok([...PAIRS.flatMap(p=>p.slice(1)), ...W3.flatMap(r=>r.slice(1)), ...QAT_WORDS]
+       .every(w => !marked(w)), 'lesson 2 carries no harakat at all');
 
-  ok(LEVELS[0].items.every(i=>cp(i)===1), 'L1 items are single codepoints');
-  [[1,F,'zabar'],[2,K,'zer'],[3,D,'pesh']].forEach(([ix,mark,nm])=>{
-    const L=LEVELS[ix];
-    ok(L.items.length===29 && L.items.every(i=>cp(i)===2 && i.endsWith(mark)),
-       `L${ix+1} 29 items, each letter + ${nm} (U+0${mark.codePointAt(0).toString(16).toUpperCase()})`);
-  });
-  ok(LEVELS[4].items.length===87 && LEVELS[4].items.every(i=>[F,K,D].includes(i.slice(-1))),
-     'L5 87 items, each ending in zabar/zer/pesh');
-  ok(LEVELS[5].items.length===87 && LEVELS[5].items.every(i=>[FN,KN,DN].includes(i.slice(-1))),
-     'L6 87 items, each ending in a tanween');
-  ok(LEVELS[6].items.every(i=>i.endsWith(SK)), 'L7 every item ends in sukoon');
-  ok(LEVELS[7].items.every(i=>i.includes(SH)), 'L8 every item contains shadda');
-  ok(LEVELS[8].items.every(i=>/[اوي]$/.test(i)), 'L9 every item ends in a madd letter');
-  ok(LEVELS[9].items.every(i=>letterCount(i)===2),  'L10 all exactly 2 letters');
-  ok(LEVELS[10].items.every(i=>letterCount(i)===3), 'L11 all exactly 3 letters');
-  ok(LEVELS[11].items.every(i=>letterCount(i)===4), 'L12 all exactly 4 letters');
+  ok(ZABAR.length === 48, `p21-24: 48 words (got ${ZABAR.length})`);
+  ok(ZABAR.every(w => w.includes(F) && !w.includes(K) && !w.includes(D)),
+     'p21-24: every mark is zabar, none is zer or pesh');
+  ok(ZER.length === 48, `p26-29: 48 words (got ${ZER.length})`);
+  ok(ZER.every(w => w.includes(K)), 'p26-29: every word carries a zer');
+  ok(PESH.length === 59, `p31-35: 59 items (got ${PESH.length})`);
+  ok(PESH.every(w => w.includes(D)), 'p31-35: every word carries a pesh');
+  ok(PESH.filter(w => w.includes(' ')).length === 3, 'p35: three two-word items');
 
-  // --- mic level: the vowel must be the variable, or auto-pop teaches nothing
-  const micLv = LEVELS.filter(l=>l.mic);
-  ok(micLv.length===1, `exactly one mic level (got ${micLv.length})`);
-  const mi = micLv[0].items;
-  ok(mi.every(i=>vowelOf(i)), 'every mic item resolves to a vowel');
-  const spread = ['a','i','u'].map(v=>mi.filter(i=>vowelOf(i)===v).length);
-  ok(spread.every(c=>c===spread[0]) && spread[0]===29,
-     `mic level is balanced 29/29/29 across a,i,u (got ${spread.join('/')})`);
-  ok(LEVELS.filter(l=>!l.mic).every(l=>{
-       const vs=new Set(l.items.map(vowelOf).filter(Boolean));
-       return vs.size!==1 || l.items.some(i=>!vowelOf(i)) || vs.size<=1;
-     }), 'non-mic levels are not silently mic-eligible');
-  ok(vowelOf('بَ')==='a' && vowelOf('بِ')==='i' && vowelOf('بُ')==='u' && !vowelOf('ب'),
-     'vowelOf maps the three harakat and rejects a bare letter');
-  ok(BASE.every(l=>NAMES[l]), 'every letter has a name for the miss report');
+  ok(F.codePointAt(0) === 0x064E && K.codePointAt(0) === 0x0650 && D.codePointAt(0) === 0x064F,
+     'zabar/zer/pesh are U+064E / U+0650 / U+064F');
+  ok(vowelled('ا', K) === 'إ' + K && vowelled('ا', F) === 'أ' + F,
+     'vowelled alif is written أ / إ as on p20 and p25');
+  ok(FLAT.length === 11, `11 levels (got ${FLAT.length})`);
+  ok(FLAT.every(l => l.book && l.teaches), 'every level names its book page and what it teaches');
+  ok(FLAT.filter(l => l.ex === 'balloon').every(l => l.items && l.items.length >= 28),
+     'every balloon level has its items');
+  ok(FLAT.every(l => !l.items || new Set(l.items).size === l.items.length),
+     'no duplicates inside a level');
+  ok(qatGroups('يوم').join('|') === 'يو|م', 'يوم breaks as يو + م — waw joins ya, not meem (p18)');
+  ok(qatGroups('كان').join('|') === 'كا|ن', 'كان breaks as كا + ن (p17)');
+  ok(qatGroups('بيت').length === 1, 'بيت has no قطع letter, so it does not break');
+  ok(FORM.med('ب') === ZWJ + 'ب' + ZWJ && FORM.fin('ب') === ZWJ + 'ب', 'ZWJ builds the forms');
+  ok(FORM.init('ى') === 'ي' + ZWJ && FORM.fin('ى') === ZWJ + 'ى',
+     'ى shows as ي at the start but stays ى at the end (p5)');
+  // ا د ذ ر ز و render the same isolated as initial, so a "where does this shape
+  // sit?" question about them has two right answers. askForm() must never pick one.
+  ok(QAT.every(l => !JOINING.includes(l)),
+     'the 6 قطع letters are excluded from position questions (their shapes are ambiguous)');
+  ok(paint('بَ', F).includes('class="red"'), 'the taught mark is painted red');
+  ok(paint('بَ', null) === 'بَ', 'no red when the level has no new mark');
 
-  const t=$('tests');
-  t.innerHTML = `<h2 class="${bad?'fail':'pass'}">${bad?bad+' FAILED':'ALL PASSED'} — ${out.length} checks</h2><br>` + out.join('');
+  const t = $('tests');
+  t.innerHTML = `<h2 class="${bad?'fail':'pass'}">${bad?bad+' FAILED':'ALL PASSED'} — ${out.length} checks</h2><br>`
+              + out.join('');
   t.classList.add('show');
 }
-syncMicButton();
-if(location.hash==='#test') runSelfTest();
+if (location.hash === '#test') runSelfTest();
 </script>
 </body>
 </html>
