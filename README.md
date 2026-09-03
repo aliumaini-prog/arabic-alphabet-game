@@ -22,12 +22,10 @@ page it came from, so the screen matches the page open in front of the child.
 
 509 items in total.
 
-## Three ways to practise joining (levels 2b and 2c)
+## Two ways to practise joining (levels 2b and 2c)
 
 Each appears as its own entry in the level list.
 
-- **Build it up** — the letters, tapped in reading order (right to left). Each tap shows
-  that letter's joining shape: ب → **بـ**, then بص → **بصـ**, then **بصل**.
 - **Find the letters** — the word is given already joined, with its letters mixed among
   decoys. The student reads it and picks out the letters in order.
 - **Pick the shape** — the letters are given separated, with every shape each can take.
@@ -35,6 +33,10 @@ Each appears as its own entry in the level list.
 
 The routine is the same throughout: **the student says it out loud, the teacher taps.**
 Each screen states this.
+
+Colour means one thing only: **green is correct, red is wrong.** A wrong tap flashes the
+letter's outline red; correct progress shows green. (The red harakat in levels 3b/3d/3f is
+different — that is the book's own printing convention, on screens with no tapping.)
 
 ## Using it in a lesson
 

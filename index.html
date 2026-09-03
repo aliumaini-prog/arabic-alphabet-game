@@ -74,8 +74,11 @@
   .step{font-size:max(44px,min(11vw,15vh));color:#c9d8e2;transition:color .25s,transform .25s;
         min-height:1.3em;line-height:1.45;padding-bottom:.34em}
   .step.shown{color:#123}
-  .step.faded{color:#f0a6a6}
-  .step.final{color:#d21f1f}
+  /* Green is what the student got right. Red is reserved for a wrong tap - using it
+     for correct progress read as an error. */
+  .step.faded{color:#1c8f4b}
+  .step.final{color:#1c8f4b}
+  .tx-ok{color:#1c8f4b}
   .grp{display:inline-block;padding:0 .12em;border-bottom:4px solid #2fa8e0;margin:0 .12em}
   /* The chip row is Arabic: the first letter must sit on the RIGHT. Setting rtl on
      each chip only affects its contents - the row's own direction is what orders them. */
@@ -93,8 +96,12 @@
   .chip.bad{border-color:#d21f1f;background:#fdecec;opacity:.55}
   .chip.used{opacity:.32;border-color:#cfe3ef;cursor:default}
   .chip.next{border-color:#2fa8e0;box-shadow:0 0 0 5px rgba(47,168,224,.22)}
-  .chip.shake{animation:shake .4s}
-  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .chip.wrong{animation:wrongflash .5s}
+  @keyframes wrongflash{
+    0%  {transform:translateX(0);   border-color:#d21f1f;background:#fdecec}
+    25% {transform:translateX(-7px);border-color:#d21f1f;background:#fdecec}
+    75% {transform:translateX(7px); border-color:#d21f1f;background:#fdecec}
+    100%{transform:translateX(0);   border-color:#cfe3ef;background:#fff}}
 
   /* ---------- bar ---------- */
   #bar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;padding:9px 14px;
@@ -233,10 +240,10 @@ const LESSONS = [
     { id:'2a', ar:'احوال الحروف', name:'Letter forms', book:'3-5', ex:'form',
       teaches:'One letter, four shapes: alone, at the start, in the middle, at the end.' },
     { id:'2b', ar:'بے حرفي الفاظ', name:'Two-letter joins', book:'6-10', ex:'join',
-      modes:['build','find','form'],
+      modes:['find','form'],
       teaches:'Name both letters, then read them joined.' },
     { id:'2c', ar:'تين حرفي الفاظ', name:'Three-letter words', book:'11-16', ex:'join',
-      modes:['build','find','form'],
+      modes:['find','form'],
       teaches:'The red letter sits at the start, the middle or the end.' },
     { id:'2d', ar:'حروف القطع', name:'Letters that do not join', book:'17-18', ex:'qat',
       teaches:'ا د ذ ر ز و join to the letter before them, never to the one after.' },
@@ -275,7 +282,7 @@ const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.r
 
 // A practice mode is a different activity on the same book pages, so each one gets
 // its own entry in the level list rather than hiding behind a second dropdown.
-const MODE_NAME = { build: 'build it up', find: 'find the letters', form: 'pick the shape' };
+const MODE_NAME = { find: 'find the letters', form: 'pick the shape' };
 const FLAT = LESSONS.flatMap(L => L.levels.flatMap(v => v.modes
   ? v.modes.map(m => ({ ...v, lesson: L, mode: m, base: v.id,
                         id: v.id + '-' + m, name: v.name + ' — ' + MODE_NAME[m] }))
@@ -444,7 +451,7 @@ function askForm() {
 /* ==========================================================================
    EXERCISE 3 - JOIN   (p6-16)  mirrors the book's separate -> faded -> bold columns
    ========================================================================== */
-let buildQ = null, joinMode = 'build';
+let buildQ = null, joinMode = 'find';
 
 // Which shape a letter takes at position i. It joins backwards only if the letter
 // BEFORE it is a joining letter, and forwards only if IT is one. That single rule
@@ -490,8 +497,6 @@ function makePool() {
   } else if (joinMode === 'form') {
     // every shape each of the word's letters can take
     buildQ.pool = shuffle(L.flatMap(formsOf));
-  } else {
-    buildQ.pool = L.slice();                     // build: just the letters, in order
   }
 }
 
@@ -507,9 +512,8 @@ function partial(word, n) {
 }
 
 const HOWTO = {
-  build: 'Student names the letter out loud — then tap it, and it shows how that letter is written here',
-  find:  'Student reads the word, then names each letter in order — tap them as they are said',
-  form:  'Student says which shape the letter takes here — tap that shape',
+  find: 'Student reads the word, then names each letter in order — tap them as they are said',
+  form: 'Student says which shape the letter takes here — tap that shape',
 };
 
 function drawJoin() {
@@ -521,8 +525,8 @@ function drawJoin() {
   $('jactions').className = '';
 
   const finished = wholeRed
-    ? `<span class="red">${word}</span>`
-    : [...word].map(c => c === letter ? `<span class="red">${c}</span>` : c).join('');
+    ? `<span class="tx-ok">${word}</span>`
+    : [...word].map(c => c === letter ? `<span class="tx-ok">${c}</span>` : c).join('');
 
   // What sits above the chips depends on the practice mode.
   let top;
@@ -540,9 +544,6 @@ function drawJoin() {
         + (idx ? '<div class="arrow">\u2190</div><div class="cell on">'
                  + `<div class="step faded">${partial(word, idx)}</div>`
                  + '<div class="cap">joined so far</div></div>' : '');
-  } else {
-    top = `<div class="cell on"><div class="step shown">${partial(word, idx) || '&nbsp;'}</div>`
-        + `<div class="cap">${idx ? 'so far' : ''}</div></div>`;
   }
   $('jsteps').innerHTML = top;
 
@@ -561,14 +562,13 @@ function drawJoin() {
   $('jhint').textContent = HOWTO[joinMode];
   const want = expected();
   pool.forEach((ch, k) => {
-    const spent = buildQ.usedKeys && buildQ.usedKeys.has(k);
-    if (spent && joinMode !== 'build') return;      // find/form: a used shape leaves the pool
+    if (buildQ.usedKeys && buildQ.usedKeys.has(k)) return;   // a used chip leaves the pool
     const el = document.createElement('div');
-    el.className = 'chip ar' + (spent ? ' used' : joinMode === 'build' && k === idx ? ' next' : '');
+    el.className = 'chip ar';
     el.textContent = ch;
     el.onclick = () => {
       if (ch !== want) {                     // wrong letter, or wrong shape, or out of order
-        el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+        el.classList.remove('wrong'); void el.offsetWidth; el.classList.add('wrong');
         return;
       }
       buildQ.usedKeys = buildQ.usedKeys || new Set();
@@ -600,7 +600,8 @@ function askQat() {
     el.onclick = () => {
       if (qatQ.done) return;
       if (QAT.includes(ch)) { qatQ.done = true; el.classList.add('good'); score(true, word); revealQat(ch); }
-      else { el.classList.add('bad'); score(false, word); }
+      else { el.classList.remove('wrong'); void el.offsetWidth; el.classList.add('wrong');
+             score(false, word); }
     };
     $('jactions').appendChild(el);
   }
@@ -609,16 +610,16 @@ function askQat() {
 function revealQat(ch) {
   const { word } = qatQ;
   const groups = qatGroups(word);
-  const red = w => [...w].map(c => QAT.includes(c) ? `<span class="red">${c}</span>` : c).join('');
+  const mark = w => [...w].map(c => QAT.includes(c) ? `<span class="tx-ok">${c}</span>` : c).join('');
   $('jsteps').innerHTML =
-      `<div class="cell on"><div class="step shown">${red(word)}</div><div class="cap">the word</div></div>`
+      `<div class="cell on"><div class="step shown">${mark(word)}</div><div class="cap">the word</div></div>`
     + '<div class="arrow">\u2190</div>'
     + `<div class="cell on"><div class="step final">`
-    + groups.map(g => `<span class="grp">${red(g)}</span>`).join('')
+    + groups.map(g => `<span class="grp">${mark(g)}</span>`).join('')
     + `</div><div class="cap">${groups.length > 1 ? 'breaks into ' + groups.length : 'stays whole'}</div></div>`;
   $('jhint').innerHTML = groups.length > 1
-    ? `<b class="ar" style="font-size:24px">${ch}</b> is a قطع letter — the word breaks right after it`
-    : `<b class="ar" style="font-size:24px">${ch}</b> is a قطع letter, but here it is the last `
+    ? `<b class="ar tx-ok" style="font-size:24px">${ch}</b> is a قطع letter — the word breaks right after it`
+    : `<b class="ar tx-ok" style="font-size:24px">${ch}</b> is a قطع letter, but here it is the last `
       + `letter, so there is nothing after it to refuse — the word stays whole`;
   $('jactions').innerHTML = '<button id="jnext2">Next word \u2192</button>';
   $('jnext2').onclick = askQat;
@@ -651,7 +652,7 @@ function reset() {
   $('hits').textContent = 0; $('miss').textContent = 0;
   $('report').classList.remove('show');
   $('play').textContent = 'Start';
-  joinMode = lv.mode || 'build';
+  joinMode = lv.mode;
   $('page').textContent = 'p' + lv.book;
   $('teach').textContent = `${lv.lesson.ar} · ${lv.ar} — ${lv.teaches}`;
   if (lv.rise) { $('rise').value = lv.rise; $('riseV').textContent = lv.rise + 's'; }
@@ -774,9 +775,10 @@ function runSelfTest() {
      'zabar/zer/pesh are U+064E / U+0650 / U+064F');
   ok(vowelled('ا', K) === 'إ' + K && vowelled('ا', F) === 'أ' + F,
      'vowelled alif is written أ / إ as on p20 and p25');
-  ok(FLAT.length === 15, `15 activities (got ${FLAT.length})`);
-  ok(FLAT.filter(l => l.ex === 'join').length === 6,
-     'each join level appears three times, once per practice mode');
+  ok(FLAT.length === 13, `13 activities (got ${FLAT.length})`);
+  ok(FLAT.filter(l => l.ex === 'join').length === 4,
+     'each join level appears twice: find the letters, and pick the shape');
+  ok(!FLAT.some(l => l.mode === 'build'), 'the build-it-up mode is gone');
   ok(FLAT.filter(l => l.ex === 'join').every(l => MODE_NAME[l.mode]),
      'every join activity names its mode');
   ok(new Set(FLAT.map(l => l.id)).size === FLAT.length, 'activity ids are unique');
@@ -787,8 +789,8 @@ function runSelfTest() {
      'menu order matches FLAT order');
   ok(FLAT.every(l => l.base && (l.base === l.id || l.id.startsWith(l.base + '-'))),
      'every activity keeps its un-suffixed base id');
-  ok(FLAT.filter(l => l.base === '2b').length === 3 && FLAT.filter(l => l.base === '2c').length === 3,
-     'the two-letter and three-letter levels each have three modes');
+  ok(FLAT.filter(l => l.base === '2b').length === 2 && FLAT.filter(l => l.base === '2c').length === 2,
+     'the two-letter and three-letter levels each have two modes');
   ok(FLAT.every(l => l.book && l.teaches), 'every level names its book page and what it teaches');
   ok(FLAT.filter(l => l.ex === 'balloon').every(l => l.items && l.items.length >= 28),
      'every balloon level has its items');
