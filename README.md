@@ -31,8 +31,9 @@ Each appears as its own entry in the level list.
 - **Pick the shape** — the letters are given separated, with every shape each can take.
   The student picks the shape each one needs: **فـ** + **ـعـ** + **ـل** = **فعل**.
 
-The routine is the same throughout: **the student says it out loud, the teacher taps.**
-Each screen states this.
+**Every screen states the routine along the top**, and it is the same everywhere:
+the student says it out loud, and you tap what they said as they say it. A wrong tap
+flashes red so both of you see it.
 
 Colour means one thing only: **green is correct, red is wrong.** A wrong tap flashes the
 letter's outline red; correct progress shows green. (The red harakat in levels 3b/3d/3f is

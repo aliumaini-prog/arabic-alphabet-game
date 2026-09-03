@@ -19,8 +19,11 @@
   .red{color:#d21f1f}
 
   /* ---------- stage ---------- */
-  #stage{position:relative;flex:1;overflow:hidden;
+  /* Column layout, so the instruction banner can wrap to any number of lines on a
+     narrow screen without a magic offset having to be kept in sync. */
+  #stage{display:flex;flex-direction:column;flex:1;overflow:hidden;
     background:radial-gradient(120% 80% at 50% 65%,#f2fbff 0%,#cfeaf9 45%,#9ed3f0 100%)}
+  #arena{position:relative;flex:1;overflow:hidden}
   .cloud{position:absolute;background:#fff;border-radius:50%;opacity:.95;
     filter:drop-shadow(0 6px 10px rgba(120,170,200,.25))}
   .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
@@ -29,6 +32,11 @@
   .c1{width:190px;height:74px;left:4%;top:7%}
   .c2{width:250px;height:88px;right:6%;top:4%}
   .c3{width:150px;height:60px;left:34%;top:19%;opacity:.7}
+  #howto{flex:0 0 auto;z-index:6;padding:10px 18px;text-align:center;
+    background:rgba(255,255,255,.88);border-bottom:1px solid #dceaf3;font-size:14px;
+    line-height:1.45;color:#1a3547}
+  #howto b{color:#0d2a3d}
+  #howto .no{color:#d21f1f;font-weight:700}
   .pane{position:absolute;inset:0;display:none}
   .pane.on{display:block}
 
@@ -144,6 +152,8 @@
 <body>
 
 <div id="stage">
+  <div id="howto"></div>
+  <div id="arena">
   <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
 
   <div class="pane on" id="pBalloon"><div id="field" style="position:absolute;inset:0"></div></div>
@@ -158,7 +168,6 @@
 
   <div class="pane" id="pJoin">
     <div class="card">
-      <div class="q" id="jq">—</div>
       <div class="steps ar" id="jsteps"></div>
       <div class="q" id="jhint" style="opacity:.75"></div>
       <div id="jactions"></div>
@@ -167,6 +176,7 @@
 
   <div id="report"></div>
   <div id="tests"></div>
+  </div>
 </div>
 
 <div id="bar">
@@ -234,37 +244,45 @@ const LESSONS = [
   { n:1, ar:'حروف الهجاء', latin:'Huroof al-Hijaa', levels:[
     { id:'1a', ar:'الحروف المفردة', name:'The 28 letters', book:'1', ex:'balloon',
       rise:8, gap:3, teaches:'Name each letter. Keep ق (qaaf) and ك (kaaf) apart.',
+      howto:"Student <b>says the letter out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Keep <b>ق</b> qaaf and <b>ك</b> kaaf apart.",
       items: LETTERS },
   ]},
   { n:2, ar:'تركيب الالفاظ', latin:'Tarkeeb al-Alfaaz', levels:[
     { id:'2a', ar:'احوال الحروف', name:'Letter forms', book:'3-5', ex:'form',
-      teaches:'One letter, four shapes: alone, at the start, in the middle, at the end.' },
+      teaches:'One letter, four shapes: alone, at the start, in the middle, at the end.',
+      howto:"Student <b>says the answer out loud</b>. Tap what they say — a wrong answer <span class=\"no\">flashes red</span>." },
     { id:'2b', ar:'بے حرفي الفاظ', name:'Two-letter joins', book:'6-10', ex:'join',
-      modes:['find','form'],
+      modes:['find','form'], howto:{ find:"Student <b>spells the word out</b>, saying the name of each letter in turn. Tap each letter as they say it — a wrong one <span class=\"no\">flashes red</span>.", form:"Student <b>says what shape each letter takes here</b>, in order. Tap each shape as they say it — a wrong one <span class=\"no\">flashes red</span>." },
       teaches:'Name both letters, then read them joined.' },
     { id:'2c', ar:'تين حرفي الفاظ', name:'Three-letter words', book:'11-16', ex:'join',
-      modes:['find','form'],
-      teaches:'The red letter sits at the start, the middle or the end.' },
+      modes:['find','form'], howto:{ find:"Student <b>spells the word out</b>, saying the name of each letter in turn. Tap each letter as they say it — a wrong one <span class=\"no\">flashes red</span>.", form:"Student <b>says what shape each letter takes here</b>, in order. Tap each shape as they say it — a wrong one <span class=\"no\">flashes red</span>." },
+      teaches:'The target letter sits at the start, the middle or the end.' },
     { id:'2d', ar:'حروف القطع', name:'Letters that do not join', book:'17-18', ex:'qat',
-      teaches:'ا د ذ ر ز و join to the letter before them, never to the one after.' },
+      teaches:'ا د ذ ر ز و join to the letter before them, never to the one after.',
+      howto:"Student <b>reads the word</b>, then says which letter never joins to the next. Tap what they say — a wrong one <span class=\"no\">flashes red</span>." },
   ]},
   { n:3, ar:'الحروف المتحركة', latin:'Al-Huroof al-Mutaharrikah', levels:[
     { id:'3a', ar:'الحروف المفتوحة', name:'Zabar (Fatha) - letters', book:'20', ex:'balloon',
       rise:8, gap:3, heavy:true, teaches:'Every letter with zabar. Starred letters are heavy.',
+      howto:"Student <b>says the letter out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Letters badged <b>جاڑو</b> are read heavy.",
       items: LETTERS.map(l => vowelled(l, F)) },
     { id:'3b', ar:'زبر تمرين', name:'Zabar words', book:'21-24', ex:'balloon', red:F,
-      rise:10, gap:4, teaches:'Three-letter words where every mark is zabar.', items: ZABAR },
+      rise:10, gap:4, teaches:'Three-letter words where every mark is zabar.',
+      howto:"Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Every mark here is zabar.", items: ZABAR },
     { id:'3c', ar:'الحروف المكسورة', name:'Zer (Kasra) - letters', book:'25', ex:'balloon',
       rise:8, gap:3, heavy:true, teaches:'Every letter with zer.',
+      howto:"Student <b>says the letter out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Letters badged <b>جاڑو</b> are read heavy.",
       items: LETTERS.map(l => vowelled(l, K)) },
     { id:'3d', ar:'زير تمرين', name:'Zer words', book:'26-29', ex:'balloon', red:K,
-      rise:11, gap:4, teaches:'Zabar and zer together. The red mark is the zer.', items: ZER },
+      rise:11, gap:4, teaches:'Zabar and zer together. The red mark is the zer.',
+      howto:"Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. The letter in red carries the zer.", items: ZER },
     { id:'3e', ar:'الحروف المضمومة', name:'Pesh (Damma) - letters', book:'30', ex:'balloon',
       rise:8, gap:3, heavy:true, teaches:'Every letter with pesh.',
+      howto:"Student <b>says the letter out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Letters badged <b>جاڑو</b> are read heavy.",
       items: LETTERS.map(l => vowelled(l, D)) },
     { id:'3f', ar:'پيش تمرين', name:'Pesh words', book:'31-35', ex:'balloon', red:D,
       rise:12, gap:4.5, teaches:'Pesh in red. The last few are two words together.',
-      items: PESH },
+      howto:"Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. The letter in red carries the pesh.", items: PESH },
   ]},
 ];
 
@@ -284,7 +302,7 @@ const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.r
 // its own entry in the level list rather than hiding behind a second dropdown.
 const MODE_NAME = { find: 'find the letters', form: 'pick the shape' };
 const FLAT = LESSONS.flatMap(L => L.levels.flatMap(v => v.modes
-  ? v.modes.map(m => ({ ...v, lesson: L, mode: m, base: v.id,
+  ? v.modes.map(m => ({ ...v, lesson: L, mode: m, base: v.id, howto: v.howto[m],
                         id: v.id + '-' + m, name: v.name + ' — ' + MODE_NAME[m] }))
   : [{ ...v, lesson: L, base: v.id }]));
 const level = () => FLAT[$('level').selectedIndex];
@@ -511,16 +529,10 @@ function partial(word, n) {
   return n < word.length ? s + ZWJ : s;
 }
 
-const HOWTO = {
-  find: 'Student reads the word, then names each letter in order — tap them as they are said',
-  form: 'Student says which shape the letter takes here — tap that shape',
-};
-
 function drawJoin() {
   const { word, letters, idx, letter, label, pool } = buildQ;
   const done = idx >= letters.length;
   const wholeRed = level().base === '2b';  // p6-10 reds the whole join, p11-16 one letter
-  $('jq').textContent = label;
   $('jsteps').onclick = null; $('jsteps').style.cursor = '';
   $('jactions').className = '';
 
@@ -559,7 +571,6 @@ function drawJoin() {
     return;
   }
 
-  $('jhint').textContent = HOWTO[joinMode];
   const want = expected();
   pool.forEach((ch, k) => {
     if (buildQ.usedKeys && buildQ.usedKeys.has(k)) return;   // a used chip leaves the pool
@@ -587,10 +598,8 @@ let qatQ = null;
 function askQat() {
   const word = pick(QAT_WORDS);
   qatQ = { word, done: false };
-  $('jq').textContent = 'Which letter here never joins to the next one?';
   $('jsteps').onclick = null; $('jsteps').style.cursor = '';
   $('jsteps').innerHTML = `<div class="cell on"><div class="step shown">${word}</div></div>`;
-  $('jhint').textContent = 'read the word, then tap that letter below';
   // The letters are offered separately rather than tapped inside the word: splitting
   // a joined word into spans breaks its shaping, so each chip shows the isolated form.
   $('jactions').innerHTML = '';
@@ -654,6 +663,7 @@ function reset() {
   $('play').textContent = 'Start';
   joinMode = lv.mode;
   $('page').textContent = 'p' + lv.book;
+  $('howto').innerHTML = lv.howto;
   $('teach').textContent = `${lv.lesson.ar} · ${lv.ar} — ${lv.teaches}`;
   if (lv.rise) { $('rise').value = lv.rise; $('riseV').textContent = lv.rise + 's'; }
   if (lv.gap)  { $('gap').value = lv.gap; $('gapV').textContent = (+lv.gap).toFixed(1) + 's'; }
@@ -792,6 +802,10 @@ function runSelfTest() {
   ok(FLAT.filter(l => l.base === '2b').length === 2 && FLAT.filter(l => l.base === '2c').length === 2,
      'the two-letter and three-letter levels each have two modes');
   ok(FLAT.every(l => l.book && l.teaches), 'every level names its book page and what it teaches');
+  ok(FLAT.every(l => typeof l.howto === 'string' && l.howto.length > 40),
+     'every activity carries a teacher routine');
+  ok(FLAT.every(l => /Student <b>/.test(l.howto)), 'every routine opens with what the STUDENT does');
+  ok(FLAT.every(l => /Tap/.test(l.howto)), 'every routine says what the teacher taps');
   ok(FLAT.filter(l => l.ex === 'balloon').every(l => l.items && l.items.length >= 28),
      'every balloon level has its items');
   ok(FLAT.every(l => !l.items || new Set(l.items).size === l.items.length),
