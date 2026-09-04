@@ -88,6 +88,24 @@ The اداء column is **generated, not transcribed**: the book states that tanw
 sakinah you say but never write, so بَنْ is derived from بَ + ن + ْ and checked against
 that rule.
 
+## Lesson 7 — التشديد (book pages 90–110)
+
+| Activity | Book | What it tests | Who judges |
+|---|---|---|---|
+| 7a What is it made of? | 91,93,96 | رَبَّ **=** رَبْ + بَ | **the game** |
+| 7b Spot the shadda | 92–102 | which letter is doubled | **the game** |
+| 7c Read shadda words | 92–99 | leaning on the doubled letter | you |
+| 7d Shadda on every letter | 100–102 | any letter doubles, with any harakat | you |
+| 7e Shadda with madd | 103–110 | double it, then hold the stretch | you |
+
+Page 91 spells the rule out — **وَبَثَّ = وَبَثْ + ثَ** — so the shadda form is *derived*
+from the sakin form and checked against it. The pairs cannot drift from the book.
+
+## All seven lessons
+
+The complete Qaidah, pages 1–110, in 37 activities. Fourteen are judged by the game
+(rules that can be checked in text), twenty-three by you (anything that is a sound).
+
 ## Teams and the big screen
 
 - **Playing** — one student, or 2–4 teams. In teams, whose turn it is shows across the

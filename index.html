@@ -354,6 +354,26 @@ const tanweenForm = (l, mark) => l + mark + (mark === FN ? 'ا' : '');
 const tanweenSound = (l, pair) => l + pair + 'ن' + SK;
 const TN_WORDS = TANWEEN.flatMap(t => t.rows.map(r => r[1]));
 
+
+/* ---- Lesson 7, التشديد — transcribed from book pages 91-110 ---- */
+const SH = '\u0651';
+// p91 states it outright:  وَبَثَّ = وَبَثْ + ثَ
+// Each row is [the sakin form, the shadda form, the harakat on it]. The shadda form is
+// derivable from the other two - drop the sukoon, put shadda + harakat in its place -
+// and the self-check verifies exactly that, so the pairs cannot drift from the book.
+const SH_PAIRS = [["شُحْ", "شُحَّ", "َ"], ["حَقْ", "حَقَّ", "َ"], ["إِنْ", "إِنَّ", "َ"], ["ثُمْ", "ثُمَّ", "َ"], ["مَسْ", "مَسَّ", "َ"], ["ظَنْ", "ظَنَّ", "َ"], ["هُنْ", "هُنَّ", "َ"], ["رَبْ", "رَبَّ", "َ"], ["ضَلْ", "ضَلَّ", "َ"], ["شَرْ", "شَرَّ", "َ"], ["حُبْ", "حُبِّ", "ِ"], ["رَبْ", "رَبِّ", "ِ"], ["كُلْ", "كُلِّ", "ِ"], ["شَرْ", "شَرِّ", "ِ"], ["حَظْ", "حَظِّ", "ِ"], ["وَلْ", "وَلِّ", "ِ"], ["حِجْ", "حِجُّ", "ُ"], ["ظَنْ", "ظَنُّ", "ُ"], ["حُرْ", "حُرُّ", "ُ"], ["شَرْ", "شَرُّ", "ُ"], ["رَبْ", "رَبُّ", "ُ"], ["بِرْ", "بِرُّ", "ُ"]];
+// p92, 94-95, 97-99
+const SH_WORDS = ["سَبَّحَ", "فَصَبَّ", "رُجَّتِ", "قَدَّرَ", "أَعَدَّ", "عَلَّمَ", "تَفَرَّقَ", "تُنَزَّلَ", "قَدَّمَتْ", "كُلَّمَا", "رَبَّنَا", "يَتَقَدَّمَ", "يَتَأَخَّرَ", "زُيِّنَ", "لِكُلِّ", "بُشِّرَ", "فَمَهِّلِ", "وَرَتِّلِ", "زُوِّجَتْ", "كُوِّرَتْ", "فُجِّرَتْ", "أُقِّتَتْ", "سُعِّرَتْ", "وَنُفَصِّلُ", "يُكَذِّبُونَ", "مُكَلِّبِينَ", "وَيُحَرِّمُ", "وَبُرِّزَتْ", "يُحِبُّ", "يَعَضُّ", "يُرَدُّ", "أَشَدُّ", "نَقُصُّ", "تَسُرُّ", "أَضَلُّ", "مُتِمُّ", "يَظُنُّ", "لَهُنَّ", "أَوَّلَ", "بَشِّرِ", "يُعَمِّرُ", "يَخْتَصُّ", "نُقَدِّسُ", "كُلُّهُنَّ", "وَأَقَلُّ", "وَيُحِلُّ", "يَمُدُّهُمْ", "يَتَفَجَّرُ", "مُتَّقِينَ", "يُذَبِّحُونَ", "يُعَلِّمُهُمْ", "لَعَلَّكُمْ", "يَتَبَدَّلِ", "رَبِّهِمْ", "رَبَّكُمْ", "أَيُّهَا", "وَيُحِقُّ", "مُحَرَّمُ", "وَرَبُّكَ"];
+// p100-102 الشدة على حروف الهجاء
+const SH_LETTERS = ["تَتَكَبَّرَ", "نُسَبِّحُ", "يَتَّبِعُ", "يُقَتِّلُونَ", "فَتَمَثَّلَ", "يَبُثُّ", "حُجَّتُهُمْ", "سُجِّرَتْ", "أَشِحَّةً", "سَخَّرَهَا", "يُؤَخِّرَ", "تُبَدَّلُ", "تُحَدِّثُ", "كَذَّبَ", "حَرَّمَ", "نُصَرِّفُ", "نَزَّلَ", "تُنَزِّلَ", "فَسَنُيَسِّرُهُۥ", "خُشَّعًا", "وَبَشِّرِ", "فَصَّلَ", "وَحُصِّلَ", "يَقُصُّ", "فَضَّلَ", "وَنُفَضِّلُ", "يَحُضُّ", "تَطَّلِعُ", "عُطِّلَتْ", "وَنَعَّمَهُۥ", "يَدُعُّ", "خَفَّفَ", "يُخَفِّفَ", "تُوَقِّرُوهُ", "أَحَقُّ", "يَتَوَكَّلُونَ", "فَكُّ", "فَتَوَلَّ", "فَصَلِّ", "تَحِلُّ", "حُمِّلُوا", "لَتَرَوُنَّ", "تُفَنِّدُونِ", "سَوَّلَتْ", "مُسَوِّمِينَ", "وَطَهَّرَ", "تَبَيَّنَ", "سُيِّرَتْ"];
+// p103-110 الشدة مع المد
+const SH_MADD = ["أَمَّا", "عَنَّا", "عَمَّا", "كُنَّا", "سَحَّارٍ", "أَفَّاكِ", "دَيَّارًا", "حَمَّالَةَ", "وَجَنَّتِ", "إِيَّاكَ", "نَضَّاخَتَانِ", "رَبِّى", "بَثِّى", "هُزِّى", "قَرِّى", "نُنَجِّيكَ", "مُتَوَفِّيكَ", "مُوَلِّيهَا", "قُصِّيهِ", "وَيُزَكِّيهِمْ", "يُغَشِّيكُمْ", "وَيُمَنِّيهِمْ", "صِدِّيقًا", "سِتِّينَ", "إِنِّى", "سِجِّيلٍ", "سِجِّينٍ", "مَرُّوا", "ضَلُّوا", "حُلُّوا", "صَدُّوا", "تُحِبُّونَ", "يُوَلُّونَ", "يَصُدُّونَ", "يَخِرُّونَ", "يَمُنُّونَ", "وَهَمُّوا", "وَصَمُّوا", "أَضَلُّوا", "أَحَسُّوا", "تَسُبُّوا", "صَلُّوا", "جَبَّارِينَ", "حَتَّىٰ", "ءَامَنَّا", "زُرَّاعَ", "أَيَّانَ", "جَلَّهَا",  "يُوَفِّيهِمْ", "مِنِّى", "عَدُوِّى", "قِسِّيسِينَ", "مُحِلِّى", "ءَامِّينَ", "يُرَدُّونَ", "تُزَكُّوا", "مُنَجُّوكَ", "يَغُضُّونَ", "يَضُرُّونَكَ", "وَظَنُّوا"];
+
+// The doubled letter: the last base letter of the shadda form.
+const doubledLetter = w => [...w].filter(c => !/[\u064B-\u0652\u0670]/.test(c)).slice(-1)[0];
+// "رَبْ + بَ" — the book's own way of writing what a shadda is made of.
+const splitOf = (sakin, letter, h) => sakin + ' + ' + letter + h;
+
 /* Split a word into clusters: a base letter plus whatever marks sit on it. Chips and
    spot-targets both work in clusters, so كِتَٰبُ offers كِ / تَٰ / بُ rather than bare letters. */
 function clusters(word) {
@@ -384,6 +404,8 @@ const TARGET = {
   // p71: a قطب جد letter carrying a sukoon is what bounces
   qalq:    cl => new Set(cl.flatMap((c, i) => QALQ.includes(c[0]) && c.includes(SK) ? [i] : [])),
   // p77-78: a ya or waw with sukoon, directly after a fatha
+  // the letter carrying a shadda - said twice, sakin then moving (p91)
+  shadda:  cl => new Set(cl.flatMap((c, i) => c.includes(SH) ? [i] : [])),
   // any of the three tanween marks
   tanween: cl => new Set(cl.flatMap((c, i) => /[ًٌٍ]/.test(c) ? [i] : [])),
   leen:    cl => new Set(cl.flatMap((c, i) =>
@@ -580,6 +602,43 @@ const LESSONS = [
       howto:'Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Sound the <b class="ar">ن</b> clearly at the end — and on '
           + '<b class="ar">عَمًى</b> the alif is written <b class="ar">ى</b> (p83).',
       items: uniq(TN_WORDS.concat(MAQSURA_TN)) },
+  ]},
+  { n:7, ar:'التشديد', latin:'At-Tashdeed', levels:[
+    { id:'7a', ar:'تشديد نو تركيب', name:'What is it made of?', book:'91,93,96', ex:'pick',
+      prompt:'What is this made of?',
+      teaches:'A shadda is the letter said twice — sakin first, then moving.',
+      howto:'Student <b>says what the shadda is made of</b> — the letter sakin, then the '
+          + 'same letter moving. Tap what they say — a wrong one <span class="no">flashes red</span>.',
+      items: SH_PAIRS.map(([sakin, shd, h]) => {
+        const l = doubledLetter(shd);
+        return { show: shd, answer: splitOf(sakin, l, h),
+                 options: [F, K, D].map(m => splitOf(sakin, l, m)) }; }) },
+
+    { id:'7b', ar:'التشديد ني پهچان', name:'Spot the shadda', book:'92-102', ex:'spot',
+      target:'shadda',
+      reveal:'{} carries the shadda — say it twice, sakin first and then moving.',
+      teaches:'Finding the doubled letter in a word.',
+      howto:'Student <b>reads the word, then says which letter is doubled</b>. '
+          + 'Tap what they say — a wrong one <span class="no">flashes red</span>.',
+      items: uniq(SH_WORDS.concat(SH_LETTERS)) },
+
+    { id:'7c', ar:'التشديد نا الفاظ', name:'Read shadda words', book:'92-99', ex:'balloon',
+      rise:12, gap:4.5,
+      teaches:'Lean on the doubled letter — hold it, do not rush past it.',
+      howto:'Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Lean on the doubled letter; do not rush past it.',
+      items: SH_WORDS },
+
+    { id:'7d', ar:'الشدة على حروف الهجاء', name:'Shadda on every letter', book:'100-102',
+      ex:'balloon', rise:13, gap:5,
+      teaches:'Every letter can carry a shadda, with any of the three harakat.',
+      howto:'Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Any letter can be doubled, with zabar, zer or pesh on it.',
+      items: SH_LETTERS },
+
+    { id:'7e', ar:'الشدة مع المد', name:'Shadda with madd', book:'103-110', ex:'balloon',
+      rise:14, gap:5, beats:true,
+      teaches:'A doubled letter followed by a stretch — hold both.',
+      howto:'Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Double the letter, then hold the stretch for two counts — the dots keep the beat.',
+      items: SH_MADD },
   ]},
 ];
 
@@ -1166,7 +1225,7 @@ function runSelfTest() {
      'zabar/zer/pesh are U+064E / U+0650 / U+064F');
   ok(vowelled('ا', K) === 'إ' + K && vowelled('ا', F) === 'أ' + F,
      'vowelled alif is written أ / إ as on p20 and p25');
-  ok(FLAT.length === 32, `32 activities (got ${FLAT.length})`);
+  ok(FLAT.length === 37, `37 activities (got ${FLAT.length})`);
   ok(FLAT.filter(l => l.ex === 'join').length === 4,
      'each join level appears twice: find the letters, and pick the shape');
   ok(!FLAT.some(l => l.mode === 'build'), 'the build-it-up mode is gone');
@@ -1285,6 +1344,33 @@ function runSelfTest() {
   ok(!TARGET.tanween(clusters('كَتَبَ')).size, 'a word with no tanween offers no answer');
   ok(MAQSURA_TN.every(w => w.includes(FN) && w.endsWith('ى')),
      'p83: tanween-fatha on an alif maqsura, written ى');
+
+  // --- Lesson 7: p91 spells the rule out, so the pairs can be derived and checked
+  const L7 = FLAT.filter(l => l.lesson.n === 7);
+  ok(L7.length === 5, `lesson 7 has 5 activities (got ${L7.length})`);
+  ok(SH_PAIRS.length === 22, `22 pairs from p91/93/96 (got ${SH_PAIRS.length})`);
+  ok(SH_PAIRS.every(([sakin]) => sakin.endsWith(SK)), 'every pair starts from a sakin form');
+  ok(SH_PAIRS.every(([sakin, shd, h]) =>
+       (sakin.slice(0, -1) + SH + h).normalize('NFC') === shd.normalize('NFC')),
+     'shadda form = sakin form with the sukoon replaced by shadda + harakat (p91)');
+  ok(SH_PAIRS.every(([sakin, shd]) => doubledLetter(shd) === sakin.slice(-2, -1)),
+     'the doubled letter is the one that was sakin');
+  ok(splitOf('رَبْ', 'ب', F) === 'رَبْ + بَ', 'the split reads as the book writes it');
+  const a7 = FLAT.find(l => l.id === '7a');
+  ok(a7.items.every(it => it.options.length === 3 && it.options.includes(it.answer)),
+     '7a offers all three harakat and includes the right split');
+  ok([SH_WORDS, SH_LETTERS, SH_MADD].every(g => g.every(w => w.includes(SH))),
+     'every lesson 7 word actually carries a shadda');
+  ok(SH_MADD.every(w => /[اويىٰ]/.test(w)), 'every p103-110 word has a stretch to hold');
+  ok(FLAT.find(l => l.id === '7b').items.every(w => TARGET.shadda(clusters(w)).size),
+     '7b: every word has a tappable shadda');
+  ok(!TARGET.shadda(clusters('كَتَبَ')).size, 'a word with no shadda offers no answer');
+
+  // --- global: Arabic marks have canonical orders, and a shadda+vowel typed the wrong
+  // way round looks identical but compares unequal. Everything must be NFC.
+  const allText = FLAT.flatMap(l => (l.items || []).map(it => typeof it === 'string' ? it : it.show));
+  ok(allText.every(w => w === w.normalize('NFC')),
+     'every item is in NFC, so equal-looking strings really are equal');
   // Word sets are as long as the book's page is - the leen list is 14 words, not 28.
   // What matters is that a set exists and is long enough not to repeat immediately.
   ok(FLAT.filter(l => l.ex === 'balloon').every(l => l.items && l.items.length >= 12),
