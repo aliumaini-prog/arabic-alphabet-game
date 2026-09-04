@@ -39,6 +39,30 @@ Colour means one thing only: **green is correct, red is wrong.** A wrong tap fla
 letter's outline red; correct progress shows green. (The red harakat in levels 3b/3d/3f is
 different — that is the book's own printing convention, on screens with no tapping.)
 
+## Lesson 4 — حروف المد (book pages 36–61)
+
+| Activity | Book | What it tests | Who judges |
+|---|---|---|---|
+| 4a Which letter stretches it? | 37,47,54 | zabar→ا, zer→ي, pesh→و | **the game** |
+| 4b Read the stretch | 37,47,54 | holding two counts | you |
+| 4c Spot the madd | 38–59 | finding the madd in a word | **the game** |
+| 4d The small alifs | 40–43 | ـٰ and ىٰ read as a full alif | **the game** |
+| 4e Written but not read | 44,55 | silent alif; the six و-as-alif words | **the game** |
+| 4f The ha silah | 53,60–61 | هِۦ and هُۥ | **the game** |
+| 4g Read madd words | 38–61 | whole words at the right length | you |
+
+The rule is judged by the game; **the sound is judged by you.** Nothing pretends to hear —
+the microphone experiments showed pronunciation cannot be verified, so where the game
+cannot check, it hands over. On 4b and 4g two dots beside the balloon keep the 1–2 count;
+they are a metronome, not a judge.
+
+## Teams and the big screen
+
+- **Playing** — one student, or 2–4 teams. In teams, whose turn it is shows across the
+  top in that team's colour, correct answers score to them, and the turn passes each item.
+- **Room size** — Normal / Large / **Panel (75")**. Scales the whole interface so it reads
+  from the back of the room. Remembered between sessions.
+
 ## Using it in a lesson
 
 - Type the **student's name** — score and missed items are kept per student.

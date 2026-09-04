@@ -10,9 +10,15 @@
      the same design tuned for vowelled Quranic text; used for the large display text. -->
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&display=swap" rel="stylesheet">
 <style>
+  /* One knob for the whole UI. The classroom runs on a 75-inch touch panel viewed from
+     about three metres, where a 14px banner is roughly 6mm tall. Every fixed size and
+     every clamp ceiling below is multiplied by this. */
+  :root{--ui:1}
+  body[data-ui="large"]{--ui:1.35}
+  body[data-ui="panel"]{--ui:1.9}
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
-  body{font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#123;
+  body{font:calc(15px * var(--ui))/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#123;
        -webkit-user-select:none;user-select:none;display:flex;flex-direction:column;background:#bfe3f7}
   .ar{font-family:"Amiri","Geeza Pro","Al Bayan","Scheherazade New",serif;direction:rtl}
   .item,.big,.step,.chip{font-family:"Amiri Quran","Amiri","Geeza Pro",serif}
@@ -33,9 +39,12 @@
   .c2{width:250px;height:88px;right:6%;top:4%}
   .c3{width:150px;height:60px;left:34%;top:19%;opacity:.7}
   #howto{flex:0 0 auto;z-index:6;padding:10px 18px;text-align:center;
-    background:rgba(255,255,255,.88);border-bottom:1px solid #dceaf3;font-size:14px;
+    background:rgba(255,255,255,.88);border-bottom:1px solid #dceaf3;font-size:calc(14px * var(--ui));
     line-height:1.45;color:#1a3547}
   #howto b{color:#0d2a3d}
+  #howto .ar{font-size:1.25em;line-height:1;unicode-bidi:isolate}
+  #turn{flex:0 0 auto;text-align:center;padding:calc(7px * var(--ui));font-weight:800;
+    font-size:calc(17px * var(--ui));color:#fff;letter-spacing:.02em}
   #howto .no{color:#d21f1f;font-weight:700}
   .pane{position:absolute;inset:0;display:none}
   .pane.on{display:block}
@@ -59,7 +68,15 @@
     border-bottom:2px solid rgba(255,255,255,.9);border-radius:0 0 0 90%;pointer-events:none}
   .item{font-size:calc(var(--w)*var(--fs));line-height:1.35;color:#111;
         padding-bottom:.06em;white-space:nowrap;pointer-events:none}
-  .heavy{position:absolute;top:8%;left:50%;translate:-50% 0;font-size:13px;font-weight:700;
+  /* Two beats beside a madd balloon, filling in turn as it rises. Ali counts 1-2 aloud
+     with the children, so this paces that count. It judges nothing. */
+  .beats{position:absolute;bottom:-8%;left:50%;translate:-50% 0;display:flex;gap:calc(7px * var(--ui))}
+  .beats i{width:calc(11px * var(--ui));height:calc(11px * var(--ui));border-radius:50%;
+    background:rgba(255,255,255,.55);box-shadow:0 0 0 2px rgba(13,42,61,.18)}
+  .beats i:nth-child(1){animation:beat var(--rise) linear forwards}
+  .beats i:nth-child(2){animation:beat var(--rise) linear forwards;animation-delay:calc(var(--rise) / 2)}
+  @keyframes beat{0%{background:rgba(255,255,255,.55)}1%,100%{background:#f3e14f}}
+  .heavy{position:absolute;top:8%;left:50%;translate:-50% 0;font-size:calc(13px * var(--ui));font-weight:700;
     color:#b4530a;background:#fff5e6;border-radius:8px;padding:1px 7px;pointer-events:none}
   .popped{animation:pop .18s ease-out forwards!important}
   @keyframes pop{ to{ transform:scale(1.55);opacity:0 } }
@@ -67,14 +84,14 @@
   /* ---------- form match ---------- */
   .card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
     justify-content:safe center;gap:12px;padding:14px;text-align:center;overflow-y:auto}
-  .q{font-size:15px;color:#28536b;font-weight:600}
-  .big{font-size:clamp(70px,17vw,150px);line-height:1.45;color:#123}
+  .q{font-size:calc(15px * var(--ui));color:#28536b;font-weight:600}
+  .big{font-size:clamp(70px,17vw,calc(150px * var(--ui)));line-height:1.45;color:#123}
   .opts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
-  .opt{min-width:clamp(96px,10vw,126px);min-height:clamp(96px,10vw,126px);padding:6px 20px;
+  .opt{min-width:clamp(96px,10vw,calc(126px * var(--ui)));min-height:clamp(96px,10vw,calc(126px * var(--ui)));padding:6px 20px;
     border:3px solid #cfe3ef;border-radius:18px;background:#fff;cursor:pointer;
-    font-size:clamp(44px,5.6vw,60px);line-height:1.2;display:grid;place-items:center;
+    font-size:clamp(44px,5.6vw,calc(60px * var(--ui)));line-height:1.2;display:grid;place-items:center;
     transition:.12s}
-  .opt.lat{font-size:21px;font-family:inherit;direction:ltr;min-height:78px;line-height:1.4}
+  .opt.lat{font-size:calc(21px * var(--ui));font-family:inherit;direction:ltr;min-height:78px;line-height:1.4}
   .opt.lat .gl{top:0}
   .opt:hover{border-color:#2fa8e0}
   .opt.good{border-color:#2fa04a;background:#e9f9ec}
@@ -82,7 +99,7 @@
 
   /* ---------- join ---------- */
   .steps{display:flex;gap:clamp(10px,4vw,44px);align-items:center;justify-content:center;flex-wrap:wrap}
-  .step{font-size:max(44px,min(11vw,15vh));color:#c9d8e2;transition:color .25s,transform .25s;
+  .step{font-size:max(44px,min(11vw,15vh,calc(104px * var(--ui))));color:#c9d8e2;transition:color .25s,transform .25s;
         min-height:1.3em;line-height:1.45;padding-bottom:.34em}
   .step.shown{color:#123}
   /* Green is what the student got right. Red is reserved for a wrong tap - using it
@@ -96,13 +113,13 @@
   #jactions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;direction:rtl}
   #jactions.ltr{direction:ltr}
   .cell{display:flex;flex-direction:column;align-items:center;gap:6px}
-  .cap{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#8aa4b5;margin-top:4px}
+  .cap{font-size:calc(11px * var(--ui));letter-spacing:.05em;text-transform:uppercase;color:#8aa4b5;margin-top:4px}
   .cell.on .cap{color:#28536b}
-  .arrow{font-size:30px;color:#8aa4b5;align-self:center}
+  .arrow{font-size:calc(30px * var(--ui));color:#8aa4b5;align-self:center}
   .waiting{color:#c9d8e2}
   .gl{display:block;position:relative;top:-0.6em}   /* centres Amiri's ink, see note above */
-  .chip{min-width:clamp(74px,8.5vw,108px);min-height:clamp(74px,8.5vw,108px);
-    font-size:clamp(38px,5vw,58px);line-height:1.2;padding:6px 18px;overflow:hidden;
+  .chip{min-width:clamp(74px,8.5vw,calc(108px * var(--ui)));min-height:clamp(74px,8.5vw,calc(108px * var(--ui)));
+    font-size:clamp(38px,5vw,calc(58px * var(--ui)));line-height:1.2;padding:6px 18px;overflow:hidden;
     border:3px solid #cfe3ef;border-radius:16px;
     background:#fff;cursor:pointer;display:grid;place-items:center;transition:.12s}
   .chip:hover{border-color:#2fa8e0}
@@ -120,7 +137,7 @@
   /* ---------- bar ---------- */
   #bar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;padding:9px 14px;
     background:#0d2a3d;color:#eaf6ff;box-shadow:0 -4px 14px rgba(0,0,0,.18);z-index:5}
-  #bar label{display:flex;flex-direction:column;gap:3px;font-size:10px;letter-spacing:.04em;
+  #bar label{display:flex;flex-direction:column;gap:3px;font-size:calc(10px * var(--ui));letter-spacing:.04em;
     text-transform:uppercase;opacity:.85}
   select,button,input[type=text]{font:inherit;border-radius:8px;border:0;padding:7px 11px;cursor:pointer}
   input[type=text]{cursor:text;width:120px}
@@ -129,10 +146,17 @@
   button:hover{filter:brightness(1.1)}
   button.ghost{background:#20455c}
   input[type=range]{width:112px;accent-color:#2fa8e0}
-  .val{font-variant-numeric:tabular-nums;font-size:13px;text-transform:none;font-weight:600;opacity:1}
-  .page{background:#f3e14f;color:#0d2a3d;border-radius:8px;padding:4px 9px;font-weight:700;font-size:12px}
-  .teach{flex-basis:100%;font-size:12px;opacity:.75;margin-top:-4px}
-  .score{margin-left:auto;display:flex;gap:14px;font-size:21px;font-weight:700;
+  .val{font-variant-numeric:tabular-nums;font-size:calc(13px * var(--ui));text-transform:none;font-weight:600;opacity:1}
+  .page{background:#f3e14f;color:#0d2a3d;border-radius:8px;padding:4px 9px;font-weight:700;font-size:calc(12px * var(--ui))}
+  .teach{flex-basis:100%;font-size:calc(12px * var(--ui));opacity:.75;margin-top:-4px}
+  #teams{display:flex;gap:calc(10px * var(--ui));align-items:center;margin-left:auto}
+  #teams .t{display:flex;align-items:center;gap:calc(7px * var(--ui));padding:calc(5px * var(--ui)) calc(12px * var(--ui));
+    border-radius:10px;background:#20455c;font-weight:700;font-size:calc(15px * var(--ui));opacity:.5;
+    transition:.15s;border:2px solid transparent}
+  #teams .t.up{opacity:1;border-color:#f3e14f;background:#2a5a76}
+  #teams .dot{width:calc(13px * var(--ui));height:calc(13px * var(--ui));border-radius:50%}
+  #teams .n{font-variant-numeric:tabular-nums}
+  .score{display:flex;gap:14px;font-size:calc(21px * var(--ui));font-weight:700;
     font-variant-numeric:tabular-nums}
   .ok{color:#7ee08a} .bad{color:#ff9b9b}
 
@@ -140,14 +164,14 @@
   #report{position:absolute;inset:auto 0 0 0;max-height:64%;overflow:auto;background:rgba(255,255,255,.97);
     padding:14px 18px 18px;border-top:3px solid #2fa8e0;display:none;z-index:4}
   #report.show{display:block}
-  #report h2{font-size:14px;margin-bottom:4px;color:#0d2a3d}
-  #report h3{font-size:12px;margin:12px 0 6px;color:#28536b}
+  #report h2{font-size:calc(14px * var(--ui));margin-bottom:4px;color:#0d2a3d}
+  #report h3{font-size:calc(12px * var(--ui));margin:12px 0 6px;color:#28536b}
   #report ul{display:flex;flex-wrap:wrap;gap:7px;list-style:none}
   #report li{background:#fff2f2;border:1px solid #ffd0d0;border-radius:9px;padding:5px 10px;
     display:flex;align-items:center;gap:7px}
-  #report .g{font-size:32px}
-  #report .n{font-size:11px;color:#a44}
-  #report .empty{color:#2a7;font-size:13px}
+  #report .g{font-size:calc(32px * var(--ui))}
+  #report .n{font-size:calc(11px * var(--ui));color:#a44}
+  #report .empty{color:#2a7;font-size:calc(13px * var(--ui))}
 
   #tests{position:absolute;inset:0;background:#fff;padding:22px;overflow:auto;z-index:9;
     font:13px/1.6 ui-monospace,Menlo,monospace;display:none}
@@ -159,6 +183,7 @@
 
 <div id="stage">
   <div id="howto"></div>
+  <div id="turn" hidden></div>
   <div id="arena">
   <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
 
@@ -186,8 +211,23 @@
 </div>
 
 <div id="bar">
-  <label>Student
+  <label>Playing
+    <select id="mode">
+      <option value="solo">One student</option>
+      <option value="teams2">2 teams</option>
+      <option value="teams3">3 teams</option>
+      <option value="teams4">4 teams</option>
+    </select>
+  </label>
+  <label id="lWho">Student
     <input type="text" id="who" placeholder="name" maxlength="16">
+  </label>
+  <label>Room size
+    <select id="uiScale">
+      <option value="1">Normal</option>
+      <option value="large">Large</option>
+      <option value="panel">Panel (75")</option>
+    </select>
   </label>
   <label>Lesson &amp; level
     <select id="level"></select>
@@ -202,6 +242,7 @@
   <button id="play">Start</button>
   <button id="reset" class="ghost">Reset</button>
   <button id="rep" class="ghost">Report</button>
+  <div id="teams"></div>
   <div class="score"><span class="ok" id="hits">0</span><span class="bad" id="miss">0</span></div>
   <div class="teach" id="teach"></div>
 </div>
@@ -246,6 +287,52 @@ const PESH = ["وَهُوَ", "أُذِنَ", "مَثَلُ", "تَذَرُ", "�
 const vowelled = (l, m) => (l === 'ا' ? (m === K ? 'إ' : 'أ') : l) + m;
 const JOINING = LETTERS.filter(l => !QAT.includes(l));   // the 22 that join both ways
 
+
+/* ---- Lesson 4, حروف المد — transcribed from book pages 37-61 ---- */
+const DAGGER = '\u0670', SUP_YA = '\u06E6', SUP_WAW = '\u06E5';
+// p37/47/54: the pairing this whole lesson rests on
+const MADD_OF = { [F]: 'ا', [K]: 'ي', [D]: 'و' };
+// p38-39, 45-46 / p48-52 / p56-59
+const MADD_A = ["تَابَ", "ثَانِيَ", "فَحَاقَ", "يَخَافُ", "جِدَالَ", "عَذَابُ", "رَانَ", "أَزَاغَ", "أَصَابَ", "فَطَافَ", "طَعَامَ", "بِغَالَ", "فَاطِرِ", "مُقَامَ", "فَكَانَ", "وَلَاتَ", "نَمَارِقُ", "نَاقَةُ", "كَوَاعِبَ", "طَابَ", "خَابَ", "خَافَ", "قَالَ", "مَالِ", "نَارُ", "ذَاتَ", "وَنَتَجَاوَزُ", "شَانِئَكَ", "نُدَاوِلُهَا", "مَا", "بَالُ", "يُحَاطَ", "جَوَابَ", "نَكَالَ", "أَبَانَا", "دَعَانَا"];
+const MADD_Y = ["سَبِيلِ", "يَتِيمَ", "تُثِيرُ", "يُجِيبُ", "أُحِيطَ", "أَخِيهِ", "شَدِيدُ", "نَذِيرِ", "نُرِيدُ", "يَزِيغُ", "وَسِيقَ", "بَشِيرُ", "بَصِيرُ", "يَضِيقُ", "يُعِيدُ", "وَغِيضَ", "فِيهِ", "وَقِيلَ", "دِينُ", "رَفِيعُ", "بَدِيعُ", "يُنِيبُ", "أُجِيبُ", "حِينَ", "حَدِيثُ", "يَهِيجُ", "تَبِيدَ", "نَمِيرُ", "يَغِيظُ", "يُمِيتُ", "عَلِيمُ", "صَرِيخَ", "تَمِيدَ"];
+const MADD_W = ["أَبُوهُمَا", "يَتُوبَ", "لَبِثُوا", "فُجُورَهَا", "يَحُورَ", "نَخُوضُ", "صُدُورِ", "يَذُوقُونَ", "بُرُوجِ", "رَسُولُ", "نُشُورُ", "بُطُونِ", "تَعِظُونَ", "أَعُوذُ", "يَغُوثَ", "غَفُورُ", "يَقُومُ", "مَلَكُوتِ", "تُقَتِلُونَ", "يَمُوتُ", "يَدِينُونَ", "سَاهُونَ", "بُيُوتِ", "يُوقَدُ", "يُوثِقُ", "نُودِىَ", "أَقُولَ", "حُدُودَ", "يُوصَلَ", "جُذُوع", "شُورَىٰ", "يَقُولُ", "ذَنُوبِ"];
+// p40-41,44 الف صغيرة  ·  p42-43 الف مقصورة
+const DAGGER_W = ["كِتَٰبُ", "تُجَٰدِلُ", "صِرَٰطَ", "مَسَٰجِدَ", "يُضَٰعَفُ", "عِظَٰمَ", "لِهَٰذَا", "مَٰلِكَ", "غَٰيَبَتِ", "مَتَٰعُ", "خَلَٰقَ", "ثَمَٰنِيَ", "ءَاتَٰنِي", "نَادَٰنَا", "أَتَٰكَ", "ضُحَٰهَا", "ثَلَٰثَ"];
+const MAQSURA  = ["رَأَىٰ", "أَبَىٰ", "أَتَىٰ", "سَجَىٰ", "فَنَادَىٰ", "عَسَىٰ", "فَعَصَىٰ", "لَظَىٰ", "وَسَعَىٰ", "كَفَىٰ", "فَسَقَىٰ", "هَوَىٰ", "طُوَىٰ", "شُورَىٰ"];
+// p44: و written, read as alif — a fixed list, learnt by heart
+const WAW_AS_ALIF = ["حَيَوٰةِ", "صَلَوٰةِ", "زَكَوٰةِ", "مَنَوٰةَ", "رِبَوٰا", "نَجَوٰةِ"];
+// p55: the alif written after a madd waw is not pronounced
+const SILENT_ALIF = ["لَبِثُوا", "بَرَزُوا", "خَلَصُوا", "رَضُوا", "فَتَحُوا", "عَتَوْا", "تَسُبُّوا", "أَضَلُّوا"];
+// p53 / p60-61: the ها silah
+const SILAH_Y = ["سَبِيلِهِۦ", "وَكُتُبِهِۦ", "بِهِۦ", "مَوَٰضِعِهِۦ", "عِبَادِهِۦ", "وَرُسُلِهِۦ", "تُقَاتِهِۦ", "دِينِهِۦ", "هَٰذِهِۦ", "لِعِبَادِهِۦ", "بِوَلَدِهِۦ", "وَجُنُودِهِۦ"];
+const SILAH_W = ["سَمِعَهُۥ", "مَعَهُۥ", "فَلَهُۥ", "وَقَبِيلُهُۥ", "خَلَقَهُۥ", "فَمَثَلُهُۥ", "عَمَلُهُۥ", "جَعَلَهُۥ", "نَبَذَهُۥ", "رَسُولُهُۥ", "دَخَلَهُۥ", "لَهُۥ", "وَزَادَهُۥ", "كِتَٰبَهُۥ", "عَذَابَهُۥ", "رُسُلَهُۥ"];
+
+/* Split a word into clusters: a base letter plus whatever marks sit on it. Chips and
+   spot-targets both work in clusters, so كِتَٰبُ offers كِ / تَٰ / بُ rather than bare letters. */
+function clusters(word) {
+  const out = [];
+  for (const ch of word) {
+    if (IS_MARK.test(ch) && out.length) out[out.length - 1] += ch;
+    else out.push(ch);
+  }
+  return out;
+}
+const uniq = a => [...new Set(a)];
+const isMadd = (cl, i) => i > 0 && cl[i].length === 1
+  && MADD_OF[cl[i - 1].slice(-1)] === cl[i];
+
+/* Which cluster is the answer, per activity. Returning a Set means a word with two
+   valid answers (زاد has three قطع letters) accepts any of them. */
+const TARGET = {
+  qat:     cl => new Set(cl.flatMap((c, i) => QAT.includes(c[0]) ? [i] : [])),
+  madd:    cl => new Set(cl.flatMap((c, i) => isMadd(cl, i) ? [i] : [])),
+  little:  cl => new Set(cl.flatMap((c, i) => c.includes(DAGGER) || c.startsWith('ى') ? [i] : [])),
+  unread:  cl => new Set(cl.flatMap((c, i) =>
+             (c.includes(DAGGER) && c[0] === 'و') || (c === 'ا' && i > 0 && cl[i - 1][0] === 'و')
+               ? [i] : [])),
+  silah:   cl => new Set(cl.flatMap((c, i) => c.includes(SUP_YA) || c.includes(SUP_WAW) ? [i] : [])),
+};
+
 const LESSONS = [
   { n:1, ar:'حروف الهجاء', latin:'Huroof al-Hijaa', levels:[
     { id:'1a', ar:'الحروف المفردة', name:'The 28 letters', book:'1', ex:'balloon',
@@ -263,32 +350,88 @@ const LESSONS = [
     { id:'2c', ar:'تين حرفي الفاظ', name:'Three-letter words', book:'11-16', ex:'join',
       modes:['find','form'], howto:{ find:"Student <b>spells the word out</b>, saying the name of each letter in turn. Tap each letter as they say it — a wrong one <span class=\"no\">flashes red</span>.", form:"Student <b>says what shape each letter takes here</b>, in order. Tap each shape as they say it — a wrong one <span class=\"no\">flashes red</span>." },
       teaches:'The target letter sits at the start, the middle or the end.' },
-    { id:'2d', ar:'حروف القطع', name:'Letters that do not join', book:'17-18', ex:'qat',
+    { id:'2d', ar:'حروف القطع', name:'Letters that do not join', book:'17-18', ex:'spot',
+      target:'qat', items: QAT_WORDS,
       teaches:'ا د ذ ر ز و join to the letter before them, never to the one after.',
       howto:"Student <b>reads the word</b>, then says which letter never joins to the next. Tap what they say — a wrong one <span class=\"no\">flashes red</span>." },
   ]},
   { n:3, ar:'الحروف المتحركة', latin:'Al-Huroof al-Mutaharrikah', levels:[
     { id:'3a', ar:'الحروف المفتوحة', name:'Zabar (Fatha) - letters', book:'20', ex:'balloon',
       rise:8, gap:3, heavy:true, teaches:'Every letter with zabar. Starred letters are heavy.',
-      howto:"Student <b>says the letter out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Letters badged <b>جاڑو</b> are read heavy.",
+      howto:"Student <b>says the letter out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Letters badged <b class=\"ar\">جاڑو</b> are read heavy.",
       items: LETTERS.map(l => vowelled(l, F)) },
     { id:'3b', ar:'زبر تمرين', name:'Zabar words', book:'21-24', ex:'balloon', red:F,
       rise:10, gap:4, teaches:'Three-letter words where every mark is zabar.',
       howto:"Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Every mark here is zabar.", items: ZABAR },
     { id:'3c', ar:'الحروف المكسورة', name:'Zer (Kasra) - letters', book:'25', ex:'balloon',
       rise:8, gap:3, heavy:true, teaches:'Every letter with zer.',
-      howto:"Student <b>says the letter out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Letters badged <b>جاڑو</b> are read heavy.",
+      howto:"Student <b>says the letter out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Letters badged <b class=\"ar\">جاڑو</b> are read heavy.",
       items: LETTERS.map(l => vowelled(l, K)) },
     { id:'3d', ar:'زير تمرين', name:'Zer words', book:'26-29', ex:'balloon', red:K,
       rise:11, gap:4, teaches:'Zabar and zer together. The red mark is the zer.',
       howto:"Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. The letter in red carries the zer.", items: ZER },
     { id:'3e', ar:'الحروف المضمومة', name:'Pesh (Damma) - letters', book:'30', ex:'balloon',
       rise:8, gap:3, heavy:true, teaches:'Every letter with pesh.',
-      howto:"Student <b>says the letter out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Letters badged <b>جاڑو</b> are read heavy.",
+      howto:"Student <b>says the letter out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Letters badged <b class=\"ar\">جاڑو</b> are read heavy.",
       items: LETTERS.map(l => vowelled(l, D)) },
     { id:'3f', ar:'پيش تمرين', name:'Pesh words', book:'31-35', ex:'balloon', red:D,
       rise:12, gap:4.5, teaches:'Pesh in red. The last few are two words together.',
       howto:"Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. The letter in red carries the pesh.", items: PESH },
+  ]},
+  { n:4, ar:'حروف المد', latin:'Huroof al-Madd', levels:[
+    { id:'4a', ar:'حرف المد', name:'Which letter stretches it?', book:'37,47,54', ex:'pick',
+      prompt:'Which letter stretches this sound?',
+      teaches:'zabar stretches with alif, zer with ya, pesh with waw.',
+      howto:'Student <b>says which letter stretches it</b> — zabar <b class="ar">ا</b>, '
+          + 'zer <b class="ar">ي</b>, pesh <b class="ar">و</b>. '
+          + 'Tap what they say — a wrong one <span class="no">flashes red</span>.',
+      items: LETTERS.flatMap(l => [F, K, D].map(m => ({
+        show: vowelled(l, m), answer: MADD_OF[m], options: ['ا', 'ي', 'و'] }))) },
+
+    { id:'4b', ar:'المد الطبيعي', name:'Read the stretch', book:'37,47,54', ex:'balloon',
+      rise:11, gap:4, beats:true,
+      teaches:'Hold the stretched sound for two counts.',
+      howto:'Student <b>reads the stretched sound, holding it for two counts</b> — the two dots '
+          + 'keep the beat. Tap its balloon if the length was right.',
+      items: LETTERS.flatMap(l => [F, K, D].map(m => vowelled(l, m) + MADD_OF[m])) },
+
+    { id:'4c', ar:'المد نا الفاظ', name:'Spot the madd', book:'38-59', ex:'spot', target:'madd',
+      reveal:'{} is the madd — it carries no harakat, and the mark before it stretches into it.',
+      teaches:'Find the stretched letter inside a real word.',
+      howto:'Student <b>reads the word, then says which letter is stretched</b>. '
+          + 'Tap what they say — a wrong one <span class="no">flashes red</span>.',
+      items: uniq(MADD_A.concat(MADD_Y, MADD_W)) },
+
+    { id:'4d', ar:'الالف الصغيرة والمقصورة', name:'The small alifs', book:'40-43', ex:'spot',
+      target:'little',
+      reveal:'{} carries the little alif — read it as a full alif, two counts long.',
+      teaches:'ـٰ and ىٰ are both read as a full alif.',
+      howto:'Student <b>reads the word, then says where the little alif is</b>. '
+          + 'Tap what they say — a wrong one <span class="no">flashes red</span>.',
+      items: uniq(DAGGER_W.concat(MAQSURA)) },
+
+    { id:'4e', ar:'لكهان ما چھے، پڑھاے نهيں', name:'Written but not read', book:'44,55', ex:'spot',
+      target:'unread',
+      reveal:'{} is written but not read as itself — a fixed handful of words, learnt by heart.',
+      teaches:'Some letters are written and not pronounced.',
+      howto:'Student <b>reads the word, then says which letter is written but not read</b>. '
+          + 'Tap what they say — a wrong one <span class="no">flashes red</span>.',
+      items: uniq(WAW_AS_ALIF.concat(SILENT_ALIF)) },
+
+    { id:'4f', ar:'"هاء" انے "ياء" / "واو"', name:'The ha silah', book:'53,60-61', ex:'spot',
+      target:'silah',
+      reveal:'{} carries the small letter — the ها stretches for two counts.',
+      teaches:'A small ya or waw on the ها stretches it.',
+      howto:'Student <b>reads the word, then says where the small ya or waw is</b>. '
+          + 'Tap what they say — a wrong one <span class="no">flashes red</span>.',
+      items: uniq(SILAH_Y.concat(SILAH_W)) },
+
+    { id:'4g', ar:'المد نا الفاظ ني تمرين', name:'Read madd words', book:'38-61', ex:'balloon',
+      rise:13, gap:5, beats:true,
+      teaches:'Read whole words, holding every madd for two counts.',
+      howto:'Student <b>reads the whole word out loud</b>, holding each stretch for two counts. '
+          + 'Tap its balloon if the length was right.',
+      items: uniq(MADD_A.concat(MADD_Y, MADD_W, DAGGER_W, MAQSURA, SILAH_Y, SILAH_W)) },
   ]},
 ];
 
@@ -314,6 +457,38 @@ const FLAT = LESSONS.flatMap(L => L.levels.flatMap(v => v.modes
 const level = () => FLAT[$('level').selectedIndex];
 
 let hits = 0, missed = 0, running = false, timer = null, bag = [], missLog = new Map();
+
+/* ---------- teams: eight children round one panel, so a turn belongs to a side ---------- */
+const TEAM_COLOURS = ['#eb5f8f', '#3fb0e0', '#7ec850', '#f0a93c'];
+const TEAM_NAMES   = ['Team 1', 'Team 2', 'Team 3', 'Team 4'];
+let teams = [], turn = 0;
+
+function setupTeams() {
+  const m = $('mode').value;
+  const n = m === 'solo' ? 0 : +m.replace('teams', '');
+  teams = Array.from({ length: n }, (_, i) => ({ name: TEAM_NAMES[i], colour: TEAM_COLOURS[i], score: 0 }));
+  turn = 0;
+  $('lWho').style.display = n ? 'none' : '';
+  $('turn').hidden = !n;
+  drawTeams();
+}
+
+function drawTeams() {
+  $('teams').innerHTML = teams.map((t, i) =>
+    `<div class="t${i === turn ? ' up' : ''}"><span class="dot" style="background:${t.colour}"></span>`
+    + `${t.name} <span class="n">${t.score}</span></div>`).join('');
+  if (teams.length) {
+    $('turn').textContent = teams[turn].name + "'s turn";
+    $('turn').style.background = teams[turn].colour;
+  }
+}
+
+// Every item is one turn, whoever answers it and however it was judged.
+function passTurn() {
+  if (!teams.length) return;
+  turn = (turn + 1) % teams.length;
+  drawTeams();
+}
 
 /* ---------- letter forms, via ZWJ: the font shapes them, we hardcode nothing ---------- */
 // ى is written as ي at the start and in the middle — alif maqsura only exists
@@ -353,10 +528,12 @@ function qatGroups(word) {
 
 /* ---------- scoring, shared by every exercise ---------- */
 function score(ok, item) {
-  if (ok) { hits++; blip(); }
+  if (ok) { hits++; blip(); if (teams.length) teams[turn].score++; }
   else { missed++; missLog.set(item, (missLog.get(item) || 0) + 1); }
   $('hits').textContent = hits; $('miss').textContent = missed;
+  drawTeams();
   saveProgress();
+  passTurn();
 }
 
 let ac;
@@ -383,13 +560,15 @@ function nextItem(list) {
 function spawn() {
   const lv = level(), item = nextItem(lv.items);
   const n = bare(item).replace(/\s/g, '').length;
-  const w = Math.min(innerWidth * 0.44, n > 5 ? 260 : n > 3 ? 230 : n > 1 ? 195 : 155);
+  const ui = parseFloat(getComputedStyle(document.body).getPropertyValue('--ui')) || 1;
+  const w = Math.min(innerWidth * 0.44, (n > 5 ? 260 : n > 3 ? 230 : n > 1 ? 195 : 155) * ui);
   const fs = n > 5 ? 0.20 : n > 3 ? 0.25 : n > 2 ? 0.31 : n > 1 ? 0.40 : 0.54;
 
   const rise = document.createElement('div');
   rise.className = 'rise';
   rise.style.left = (5 + Math.random() * 74) + '%';
   rise.style.animationDuration = $('rise').value + 's';
+  rise.style.setProperty('--rise', $('rise').value + 's');
 
   const sway = document.createElement('div');
   sway.className = 'sway';
@@ -404,6 +583,7 @@ function spawn() {
   const heavy = lv.heavy && HEAVY.includes(bare(item)[0]);
   b.innerHTML = `<span class="item ar" lang="ar">${paint(item, lv.red)}</span>`
               + (heavy ? '<span class="heavy">جاڑو</span>' : '')
+              + (lv.beats ? '<span class="beats"><i></i><i></i></span>' : '')
               + '<span class="string"></span>';
 
   b.addEventListener('click', () => {
@@ -600,50 +780,86 @@ function drawJoin() {
 /* ==========================================================================
    EXERCISE 4 - حروف القطع   (p17-18)
    ========================================================================== */
-let qatQ = null;
-function askQat() {
-  const word = pick(QAT_WORDS);
-  qatQ = { word, done: false };
+let spotQ = null;
+
+function askSpot() {
+  const lv = level();
+  const word = nextItem(lv.items);
+  const cl = clusters(word);
+  const want = TARGET[lv.target](cl);
+  if (!want.size) { askSpot(); return; }          // never show a word with no answer
+  spotQ = { word, cl, want, done: false };
   $('jsteps').onclick = null; $('jsteps').style.cursor = '';
   $('jsteps').innerHTML = `<div class="cell on"><div class="step shown">${word}</div></div>`;
-  // The letters are offered separately rather than tapped inside the word: splitting
-  // a joined word into spans breaks its shaping, so each chip shows the isolated form.
+  $('jhint').textContent = '';
   $('jactions').innerHTML = '';
-  for (const ch of [...word]) {
+  cl.forEach((c, k) => {
     const el = document.createElement('div');
-    el.className = 'chip ar'; el.innerHTML = `<span class="gl">${ch}</span>`;
+    el.className = 'chip ar';
+    el.innerHTML = `<span class="gl">${c}</span>`;
     el.onclick = () => {
-      if (qatQ.done) return;
-      if (QAT.includes(ch)) { qatQ.done = true; el.classList.add('good'); score(true, word); revealQat(ch); }
+      if (spotQ.done) return;
+      if (want.has(k)) { spotQ.done = true; el.classList.add('good'); score(true, word); revealSpot(k); }
       else { el.classList.remove('wrong'); void el.offsetWidth; el.classList.add('wrong');
              score(false, word); }
     };
     $('jactions').appendChild(el);
-  }
+  });
 }
 
-function revealQat(ch) {
-  const { word } = qatQ;
-  const groups = qatGroups(word);
-  const mark = w => [...w].map(c => QAT.includes(c) ? `<span class="tx-ok">${c}</span>` : c).join('');
-  $('jsteps').innerHTML =
-      `<div class="cell on"><div class="step shown">${mark(word)}</div><div class="cap">the word</div></div>`
-    + '<div class="arrow">\u2190</div>'
-    + `<div class="cell on"><div class="step final">`
-    + groups.map(g => `<span class="grp">${mark(g)}</span>`).join('')
-    + `</div><div class="cap">${groups.length > 1 ? 'breaks into ' + groups.length : 'stays whole'}</div></div>`;
-  $('jhint').innerHTML = groups.length > 1
-    ? `<b class="ar tx-ok" style="font-size:24px">${ch}</b> is a قطع letter — the word breaks right after it`
-    : `<b class="ar tx-ok" style="font-size:24px">${ch}</b> is a قطع letter, but here it is the last `
-      + `letter, so there is nothing after it to refuse — the word stays whole`;
+function revealSpot(k) {
+  const lv = level(), { word, cl, want } = spotQ;
+  const green = cl.map((c, i) => want.has(i) ? `<span class="tx-ok">${c}</span>` : c).join('');
+  if (lv.target === 'qat') {
+    const groups = qatGroups(word);
+    const mark = w => [...w].map(c => QAT.includes(c) ? `<span class="tx-ok">${c}</span>` : c).join('');
+    $('jsteps').innerHTML =
+        `<div class="cell on"><div class="step shown">${mark(word)}</div><div class="cap">the word</div></div>`
+      + '<div class="arrow">\u2190</div>'
+      + `<div class="cell on"><div class="step final">`
+      + groups.map(g => `<span class="grp">${mark(g)}</span>`).join('')
+      + `</div><div class="cap">${groups.length > 1 ? 'breaks into ' + groups.length : 'stays whole'}</div></div>`;
+    $('jhint').innerHTML = groups.length > 1
+      ? `<b class="ar tx-ok" style="font-size:calc(24px * var(--ui))">${cl[k]}</b> is a قطع letter — the word breaks right after it`
+      : `<b class="ar tx-ok" style="font-size:calc(24px * var(--ui))">${cl[k]}</b> is a قطع letter, but it is last here, so the word stays whole`;
+  } else {
+    $('jsteps').innerHTML = `<div class="cell on"><div class="step shown">${green}</div></div>`;
+    $('jhint').innerHTML = lv.reveal.replace('{}', `<b class="ar tx-ok" style="font-size:calc(24px * var(--ui))">${cl[k]}</b>`);
+  }
   $('jactions').innerHTML = '<button id="jnext2">Next word \u2192</button>';
-  $('jnext2').onclick = askQat;
+  $('jnext2').onclick = askSpot;
+}
+
+/* ==========================================================================
+   EXERCISE 5 - PICK ONE   self-scoring: prompt, a few big options, one right
+   ========================================================================== */
+let pickQ = null;
+function askPick() {
+  const lv = level();
+  const it = nextItem(lv.items);          // {show, answer, options}
+  pickQ = it;
+  $('fq').textContent = lv.prompt;
+  $('fshow').textContent = it.show;
+  $('fopts').innerHTML = '';
+  for (const o of it.options) {
+    const el = document.createElement('div');
+    el.className = 'opt ar';
+    el.innerHTML = `<span class="gl">${o}</span>`;
+    el.onclick = () => {
+      if (el.classList.contains('good')) return;
+      const good = o === it.answer;
+      el.classList.add(good ? 'good' : 'bad');
+      score(good, it.show);
+      if (good) setTimeout(askPick, 480);
+    };
+    $('fopts').appendChild(el);
+  }
 }
 
 /* ==========================================================================
    STAGE ROUTING
    ========================================================================== */
-const PANES = { balloon: 'pBalloon', form: 'pForm', join: 'pJoin', qat: 'pJoin' };
+const PANES = { balloon: 'pBalloon', form: 'pForm', pick: 'pForm', join: 'pJoin', spot: 'pJoin' };
 function showPane(ex) {
   for (const id of new Set(Object.values(PANES))) $(id).classList.toggle('on', PANES[ex] === id);
   const isBalloon = ex === 'balloon';
@@ -675,8 +891,9 @@ function reset() {
   if (lv.gap)  { $('gap').value = lv.gap; $('gapV').textContent = (+lv.gap).toFixed(1) + 's'; }
   showPane(lv.ex);
   if (lv.ex === 'form') askForm();
+  if (lv.ex === 'pick') askPick();
   if (lv.ex === 'join') askJoin();
-  if (lv.ex === 'qat')  askQat();
+  if (lv.ex === 'spot') askSpot();
 }
 
 /* ==========================================================================
@@ -726,6 +943,17 @@ $('level').innerHTML = LESSONS.map(L =>
         .map(v => `<option>${v.id} · ${v.name} (p${v.book})</option>`).join('')
   + '</optgroup>').join('');
 $('level').onchange = () => { missLog.clear(); reset(); };
+$('mode').onchange  = () => { setupTeams(); reset(); };
+$('uiScale').onchange = () => {
+  const v = $('uiScale').value;
+  document.body.dataset.ui = v === '1' ? '' : v;
+  try { localStorage.setItem('qaidah:ui', v); } catch (e) {}
+};
+try {
+  const savedUi = localStorage.getItem('qaidah:ui');
+  if (savedUi) { $('uiScale').value = savedUi; $('uiScale').onchange(); }
+} catch (e) { /* blocked storage - stays at Normal */ }
+setupTeams();
 $('who').onchange   = () => { missLog.clear(); reset(); };
 $('play').onclick   = () => setRunning(!running);
 $('reset').onclick  = () => { missLog.clear(); reset(); };
@@ -791,7 +1019,7 @@ function runSelfTest() {
      'zabar/zer/pesh are U+064E / U+0650 / U+064F');
   ok(vowelled('ا', K) === 'إ' + K && vowelled('ا', F) === 'أ' + F,
      'vowelled alif is written أ / إ as on p20 and p25');
-  ok(FLAT.length === 13, `13 activities (got ${FLAT.length})`);
+  ok(FLAT.length === 20, `20 activities (got ${FLAT.length})`);
   ok(FLAT.filter(l => l.ex === 'join').length === 4,
      'each join level appears twice: find the letters, and pick the shape');
   ok(!FLAT.some(l => l.mode === 'build'), 'the build-it-up mode is gone');
@@ -812,6 +1040,48 @@ function runSelfTest() {
      'every activity carries a teacher routine');
   ok(FLAT.every(l => /Student <b>/.test(l.howto)), 'every routine opens with what the STUDENT does');
   ok(FLAT.every(l => /Tap/.test(l.howto)), 'every routine says what the teacher taps');
+
+  // --- Lesson 4: the rules are computable, so the content can be checked, not just counted
+  const L4 = FLAT.filter(l => l.lesson.n === 4);
+  ok(L4.length === 7, `lesson 4 has 7 activities (got ${L4.length})`);
+  const a4 = FLAT.find(l => l.id === '4a');
+  ok(a4.items.length === 84, `4a is 28 letters x 3 harakat = 84 (got ${a4.items.length})`);
+  ok(a4.items.every(it => it.answer === MADD_OF[it.show.slice(-1)]),
+     '4a: zabar pairs with ا, zer with ي, pesh with و (p37/47/54)');
+  ok(a4.items.every(it => it.options.join('') === 'ايو'), '4a offers all three madd letters');
+
+  const cl = clusters;
+  ok(MADD_A.every(w => TARGET.madd(cl(w)).size), 'every p38-46 word really contains a madd alif');
+  ok(MADD_Y.every(w => TARGET.madd(cl(w)).size), 'every p48-52 word really contains a madd ya');
+  ok(MADD_W.every(w => TARGET.madd(cl(w)).size), 'every p56-59 word really contains a madd waw');
+  // A word may carry two madds - سَاهُونَ stretches on both ا and و - so each list is
+  // checked for the madd it is teaching, not for that one being the only madd present.
+  const carries = (w, letter) => { const c = cl(w); return [...TARGET.madd(c)].some(i => c[i] === letter); };
+  ok(MADD_A.every(w => carries(w, 'ا')), 'every p38-46 word carries a madd ا');
+  ok(MADD_Y.every(w => carries(w, 'ي')), 'every p48-52 word carries a madd ي');
+  ok(MADD_W.every(w => carries(w, 'و')), 'every p56-59 word carries a madd و');
+  ok(FLAT.find(l => l.id === '4c').items.some(w => TARGET.madd(cl(w)).size > 1),
+     'a word with two madds accepts either letter as the answer');
+
+  ok(DAGGER_W.every(w => w.includes(DAGGER)), 'every p40-41 word carries the dagger alif ٰ');
+  ok(MAQSURA.every(w => w.endsWith('ى' + DAGGER)), 'every p42-43 word ends in ىٰ');
+  ok(WAW_AS_ALIF.length === 6 && WAW_AS_ALIF.every(w => w.includes('و' + DAGGER)),
+     'p44 is the six words where و is read as alif');
+  ok(SILENT_ALIF.every(w => /و[\u0652]?ا$/.test(w)),
+     'every p55 word ends in the unpronounced وا (the waw may carry a sukoon: عَتَوْا)');
+  ok(SILAH_Y.every(w => w.includes(SUP_YA)) && SILAH_W.every(w => w.includes(SUP_WAW)),
+     'p53 words carry ۦ and p60-61 words carry ۥ');
+
+  // every spot activity must offer a findable answer on every single item
+  for (const lv of FLAT.filter(l => l.ex === 'spot')) {
+    ok(lv.items.every(w => TARGET[lv.target](clusters(w)).size > 0),
+       `${lv.id}: every item has a tappable answer`);
+  }
+  ok(FLAT.filter(l => l.ex === 'spot').every(l => l.target && (l.reveal || l.target === 'qat')),
+     'every spot activity names its target and explains the answer');
+  ok(clusters('كِتَٰبُ').join('|') === 'كِ|تَٰ|بُ', 'clusters keep each letter with its own marks');
+  ok(TARGET.madd(clusters('سَبِيلِ')).has(2), 'the madd in سَبِيلِ is the ي');
+  ok(!TARGET.madd(clusters('كَتَبَ')).size, 'a word with no madd offers no madd answer');
   ok(FLAT.filter(l => l.ex === 'balloon').every(l => l.items && l.items.length >= 28),
      'every balloon level has its items');
   ok(FLAT.every(l => !l.items || new Set(l.items).size === l.items.length),
