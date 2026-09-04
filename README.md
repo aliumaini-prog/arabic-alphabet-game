@@ -56,6 +56,22 @@ the microphone experiments showed pronunciation cannot be verified, so where the
 cannot check, it hands over. On 4b and 4g two dots beside the balloon keep the 1–2 count;
 they are a metronome, not a judge.
 
+## Lesson 5 — السكون (جزم) (book pages 62–78)
+
+| Activity | Book | What it tests | Who judges |
+|---|---|---|---|
+| 5a Which letter bounces? | 71 | the five قطب جد letters | **the game** |
+| 5b Spot the bounce | 71–73 | a قطب جد letter carrying a sukoon | **the game** |
+| 5c Sukoon syllables | 63–65 | a sakin letter leans on the one before | you |
+| 5d Sukoon words | 66–70 | stopping cleanly | you |
+| 5e Meem with jazm | 74 | lips closed, meem sounding fully | you |
+| 5f Noon with jazm | 75–76 | the noon clear and separate | you |
+| 5g Spot the leen | 77–78 | ـَيْ and ـَوْ | **the game** |
+| 5h Read leen words | 77–78 | leen said smoothly, not stretched | you |
+
+Lesson 5 is mostly sound, so most of it is yours to judge — but قلقلة and leen are both
+definable rules the game can check, and those are the ones a team can play unattended.
+
 ## Teams and the big screen
 
 - **Playing** — one student, or 2–4 teams. In teams, whose turn it is shows across the

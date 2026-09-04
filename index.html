@@ -307,6 +307,24 @@ const SILENT_ALIF = ["لَبِثُوا", "بَرَزُوا", "خَلَصُوا",
 const SILAH_Y = ["سَبِيلِهِۦ", "وَكُتُبِهِۦ", "بِهِۦ", "مَوَٰضِعِهِۦ", "عِبَادِهِۦ", "وَرُسُلِهِۦ", "تُقَاتِهِۦ", "دِينِهِۦ", "هَٰذِهِۦ", "لِعِبَادِهِۦ", "بِوَلَدِهِۦ", "وَجُنُودِهِۦ"];
 const SILAH_W = ["سَمِعَهُۥ", "مَعَهُۥ", "فَلَهُۥ", "وَقَبِيلُهُۥ", "خَلَقَهُۥ", "فَمَثَلُهُۥ", "عَمَلُهُۥ", "جَعَلَهُۥ", "نَبَذَهُۥ", "رَسُولُهُۥ", "دَخَلَهُۥ", "لَهُۥ", "وَزَادَهُۥ", "كِتَٰبَهُۥ", "عَذَابَهُۥ", "رُسُلَهُۥ"];
 
+
+/* ---- Lesson 5, السكون (جزم) — transcribed from book pages 63-78 ---- */
+const SK = '\u0652';
+// p71: the five letters that bounce — قطب جد
+const QALQ = ["ق", "ط", "ب", "ج", "د"];
+// p63-65: a sakin letter cannot stand alone; it leans on the letter before it
+const SYL_SK = ["أَتْ", "أَثْ", "أَحْ", "أَخْ", "أَذْ", "أَرْ", "أَزْ", "أَسْ", "أَشْ", "أَصْ", "أَضْ", "أَظْ", "أَعْ", "أَغْ", "أَفْ", "أَكْ", "أَلْ", "أَمْ", "أَنْ", "أَوْ", "أَهْ", "أَىْ", "إِتْ", "إِثْ", "إِحْ", "إِخْ", "إِذْ", "إِرْ", "إِزْ", "إِسْ", "إِشْ", "إِصْ", "إِضْ", "إِظْ", "إِعْ", "إِغْ", "إِفْ", "إِكْ", "إِلْ", "إِمْ", "إِنْ", "إِوْ", "إِهْ", "أُتْ", "أُثْ", "أُحْ", "أُخْ", "أُذْ", "أُرْ", "أُزْ", "أُسْ", "أُشْ", "أُصْ", "أُضْ", "أُظْ", "أُعْ", "أُغْ", "أُفْ", "أُكْ", "أُلْ", "أُمْ", "أُنْ", "أُهْ", "أُىْ"];
+// p66-70
+const SK2 = ["زُرْ", "خُذْ", "رُمْ", "شِمْ", "سَلْ", "غُثْ", "لَمْ", "مَنْ", "هَلْ", "كَمْ", "بَلْ", "مِنْ", "نُلْ", "أَنْ", "هُمْ", "مُرْ", "عَنْ", "قُلْ", "صُنْ", "صِلْ", "صُرْ", "كُمْ", "سُرْ", "دَعْ", "قُمْ", "قِفْ", "طُفْ", "صِفْ", "لَنْ", "صُمْ", "كُنْ", "لِمْ"];
+const SKW = ["فَقُلْ", "بَعْضُ", "وَهُمْ", "جَرَتْ", "قُلْتُ", "نَحْنُ", "لَهُمْ", "تَحْتِ", "قَسَتْ", "مِنْهُ", "بَعْدِ", "نَعْبُدُ", "يَتْرُكَ", "يَتْلُونَ", "مُهْلِكِ", "أَصْلَحَ", "يُخْلِفُ", "تَرْزُقُ", "بَعْضُهَا", "فَظَلْتُمْ", "لِيَحْزُنَ", "فَحُكْمُهُ", "شَكَرْتُمْ", "أَخَذْتُمْ", "يَغْفِرُ", "رِضْوَانَ", "زُحْزِحَ", "مُشْرِكِينَ", "لَيُزْلِقُونَكَ"];
+// p71-73
+const QALQ_W = ["فَرَقْنَا", "يُقْبَلُ", "بَقْلِهَا", "وَيَقْتُلُونَ", "وَأَغْرَقْنَا", "تَقْرَبَا", "رُزِقْنَا", "وَيَقْطَعُونَ", "أَفَتَطْمَعُونَ", "بَطْشَ", "وَأَطْهَرُ", "عِجْلَ", "تَجْزِى", "نَجْعَلِ", "يُخْرِجْ", "خَرَجْتَ", "أَجْمَعِينَ", "عُدْوَانِ", "يُولَدْ", "وَعَدْنَا", "يُرِدْ", "فَقَدْ", "فَلْيَمْدُدْ", "يَكَدْ", "خِطْبَةِ", "نَطْمِسَ", "بَطْنِى", "لِيَطْلِعَ", "صَبْرِ", "يُبْصِرُونَ", "سَبْتِ", "قَبْلُ", "لِجِبْرِيلَ", "إِبْرَاهِيمَ", "قِبْلَةَ"];
+// p74 الميم مع جزم  ·  p75-76 النون مع جزم
+const MEEM_SK = ["أُمْ", "بِمْ", "تُمْ", "ثَمْ", "جَمْ", "حِمْ", "خُمْ", "دَمْ", "ذَمْ", "رُمْ", "زَمْ", "سَمْ", "شِمْ", "صِمْ", "دَمْعَ", "حَمْدُ", "أَمْسِ", "أَمْرُ", "خَمْرِ", "عُمْىَ", "شَمْسِ", "وَلَهُمْ", "بِحَمْدِكَ", "أَسْلَمْتُ", "قُلُوبِهِمْ", "مُمْتَرِينَ", "عُمْرَةَ", "تَمْسَسْهُ"];
+const NOON_W  = ["مِنْ أَهْلِ", "مَنْ أَسْلَمَ", "تَأْمَنْهُ", "مِنْهَا", "مَنْ هَلَكَ", "مِنْ هَمَزَاتِ", "صَنْعَةَ", "يَنْعِقُ", "مِنْ غَيْرِكُمْ", "لِمَنْ حَارَبَ", "مِنْ حَيْثُ", "مِنْ خَلْفِهِمْ", "فَمَنْ خَافَ", "مِنْ خِطْبَةِ", "لِمَنْ خَشِىَ", "وَمَنْ أَعْرَضَ", "وَلَئِنْ أَتَيْتَ", "وَإِنْ حَكَمْتَ"];
+// p77-78 اللين: a ya or waw carrying sukoon straight after a fatha
+const LEEN_W  = ["عَلَيْكُمْ", "رَيْبَ", "غَيْرِ", "قَوْسَيْنِ", "كَيْفَ", "عَلَيْهِ", "لَيْسَ", "يَوْمَ", "قَوْمُ", "فِرْعَوْنَ", "مَوْعِدُهُمْ", "فَنَادَوْا", "فَتَمَارَوْا", "يَرَوْا"];
+
 /* Split a word into clusters: a base letter plus whatever marks sit on it. Chips and
    spot-targets both work in clusters, so كِتَٰبُ offers كِ / تَٰ / بُ rather than bare letters. */
 function clusters(word) {
@@ -317,7 +335,10 @@ function clusters(word) {
   }
   return out;
 }
-const uniq = a => [...new Set(a)];
+const uniq    = a => [...new Set(a)];
+const pick    = a => a[Math.random() * a.length | 0];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random()*(i+1)|0;
+                         [a[i],a[j]] = [a[j],a[i]]; } return a; };
 const isMadd = (cl, i) => i > 0 && cl[i].length === 1
   && MADD_OF[cl[i - 1].slice(-1)] === cl[i];
 
@@ -331,6 +352,12 @@ const TARGET = {
              (c.includes(DAGGER) && c[0] === 'و') || (c === 'ا' && i > 0 && cl[i - 1][0] === 'و')
                ? [i] : [])),
   silah:   cl => new Set(cl.flatMap((c, i) => c.includes(SUP_YA) || c.includes(SUP_WAW) ? [i] : [])),
+  // p71: a قطب جد letter carrying a sukoon is what bounces
+  qalq:    cl => new Set(cl.flatMap((c, i) => QALQ.includes(c[0]) && c.includes(SK) ? [i] : [])),
+  // p77-78: a ya or waw with sukoon, directly after a fatha
+  leen:    cl => new Set(cl.flatMap((c, i) =>
+             (c[0] === 'ي' || c[0] === 'و') && c.includes(SK) && i > 0 && cl[i - 1].includes(F)
+               ? [i] : [])),
 };
 
 const LESSONS = [
@@ -433,6 +460,60 @@ const LESSONS = [
           + 'Tap its balloon if the length was right.',
       items: uniq(MADD_A.concat(MADD_Y, MADD_W, DAGGER_W, MAQSURA, SILAH_Y, SILAH_W)) },
   ]},
+  { n:5, ar:'السكون (جزم)', latin:'As-Sukoon', levels:[
+    { id:'5a', ar:'حروف القلقلة', name:'Which letter bounces?', book:'71', ex:'pick',
+      prompt:'Which of these bounces?',
+      teaches:'The five قلقلة letters are ق ط ب ج د.',
+      howto:'Student <b>says which of these bounces</b> — the قلقلة letters are '
+          + '<b class="ar">قطب جد</b>. Tap what they say — a wrong one <span class="no">flashes red</span>.',
+      items: QALQ.flatMap(q => Array.from({length:6}, () => ({
+        show:'', answer:q,
+        options: shuffle([q, ...shuffle(LETTERS.filter(l => !QALQ.includes(l))).slice(0,3)]) }))) },
+
+    { id:'5b', ar:'القلقلة', name:'Spot the bounce', book:'71-73', ex:'spot', target:'qalq',
+      reveal:'{} carries a sukoon, and it is one of قطب جد — so it bounces.',
+      teaches:'A قطب جد letter with a sukoon on it bounces.',
+      howto:'Student <b>reads the word, then says which letter bounces</b>. '
+          + 'Tap what they say — a wrong one <span class="no">flashes red</span>.',
+      items: QALQ_W },
+
+    { id:'5c', ar:'الحروف الساكنة', name:'Sukoon syllables', book:'63-65', ex:'balloon', red:SK,
+      rise:9, gap:3.5,
+      teaches:'A sakin letter is never said alone — it joins the letter before it.',
+      howto:'Student <b>says the letter out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. A sakin letter cannot be said on its own; it leans on the one before it.',
+      items: SYL_SK },
+
+    { id:'5d', ar:'جزم نا الفاظ', name:'Sukoon words', book:'66-70', ex:'balloon', red:SK,
+      rise:11, gap:4,
+      teaches:'Stop cleanly on the sakin letter.',
+      howto:'Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Stop cleanly on the letter in red.',
+      items: uniq(SK2.concat(SKW)) },
+
+    { id:'5e', ar:'الميم مع جزم', name:'Meem with jazm', book:'74', ex:'balloon', red:SK,
+      rise:10, gap:4,
+      teaches:'The lips close and the meem sounds fully.',
+      howto:'Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. On a sakin <b class="ar">م</b> the lips close and the meem sounds fully.',
+      items: MEEM_SK },
+
+    { id:'5f', ar:'النون مع جزم', name:'Noon with jazm', book:'75-76', ex:'balloon', red:SK,
+      rise:13, gap:4.5,
+      teaches:'The noon sounds clearly and separately.',
+      howto:'Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. On a sakin <b class="ar">ن</b> the noon sounds clear and separate.',
+      items: NOON_W },
+
+    { id:'5g', ar:'اللين', name:'Spot the leen', book:'77-78', ex:'spot', target:'leen',
+      reveal:'{} is a leen letter — a sukoon on ي or و straight after a zabar.',
+      teaches:'ـَيْ and ـَوْ are the leen letters.',
+      howto:'Student <b>reads the word, then says which letter is the leen</b>. '
+          + 'Tap what they say — a wrong one <span class="no">flashes red</span>.',
+      items: LEEN_W },
+
+    { id:'5h', ar:'اللين نا الفاظ', name:'Read leen words', book:'77-78', ex:'balloon', red:SK,
+      rise:11, gap:4,
+      teaches:'Read ـَيْ and ـَوْ smoothly, without stretching them.',
+      howto:'Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Say the leen smoothly — it is not stretched like a madd.',
+      items: LEEN_W },
+  ]},
 ];
 
 /* ==========================================================================
@@ -443,9 +524,6 @@ const COLORS = ['#eb8fd4','#a9e05f','#f3e14f','#d9dee4','#8fd0f5','#f7a85c','#c3
 const HARAKAT = /[ً-ْٰ]/g;
 const IS_MARK = /[ً-ْٰ]/;      // non-global: .test() on a /g regex is stateful
 const bare = s => s.replace(HARAKAT, '');
-const pick = a => a[Math.random() * a.length | 0];
-const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random()*(i+1)|0;
-                         [a[i],a[j]] = [a[j],a[i]]; } return a; };
 
 // A practice mode is a different activity on the same book pages, so each one gets
 // its own entry in the level list rather than hiding behind a second dropdown.
@@ -840,6 +918,7 @@ function askPick() {
   pickQ = it;
   $('fq').textContent = lv.prompt;
   $('fshow').textContent = it.show;
+  $('fshow').style.display = it.show ? '' : 'none';   // 5a asks only about the options
   $('fopts').innerHTML = '';
   for (const o of it.options) {
     const el = document.createElement('div');
@@ -1019,7 +1098,7 @@ function runSelfTest() {
      'zabar/zer/pesh are U+064E / U+0650 / U+064F');
   ok(vowelled('ا', K) === 'إ' + K && vowelled('ا', F) === 'أ' + F,
      'vowelled alif is written أ / إ as on p20 and p25');
-  ok(FLAT.length === 20, `20 activities (got ${FLAT.length})`);
+  ok(FLAT.length === 28, `28 activities (got ${FLAT.length})`);
   ok(FLAT.filter(l => l.ex === 'join').length === 4,
      'each join level appears twice: find the letters, and pick the shape');
   ok(!FLAT.some(l => l.mode === 'build'), 'the build-it-up mode is gone');
@@ -1082,8 +1161,37 @@ function runSelfTest() {
   ok(clusters('كِتَٰبُ').join('|') === 'كِ|تَٰ|بُ', 'clusters keep each letter with its own marks');
   ok(TARGET.madd(clusters('سَبِيلِ')).has(2), 'the madd in سَبِيلِ is the ي');
   ok(!TARGET.madd(clusters('كَتَبَ')).size, 'a word with no madd offers no madd answer');
-  ok(FLAT.filter(l => l.ex === 'balloon').every(l => l.items && l.items.length >= 28),
-     'every balloon level has its items');
+
+  // --- Lesson 5: قلقلة and leen are both computable, so the words can be checked
+  const L5 = FLAT.filter(l => l.lesson.n === 5);
+  ok(L5.length === 8, `lesson 5 has 8 activities (got ${L5.length})`);
+  ok(QALQ.join('') === 'قطبجد', 'the قلقلة letters are قطب جد (p71)');
+  ok(QALQ_W.every(w => TARGET.qalq(clusters(w)).size),
+     'every p71-73 word really contains a bouncing letter');
+  ok(QALQ_W.every(w => [...TARGET.qalq(clusters(w))]
+       .every(i => QALQ.includes(clusters(w)[i][0]) && clusters(w)[i].includes(SK))),
+     'the bounce found is a قطب جد letter carrying a sukoon, not just any sukoon');
+  ok(!TARGET.qalq(clusters('نَعْبُدُ')).size,
+     'نَعْبُدُ has a sukoon but on ع, so nothing bounces');
+  ok(LEEN_W.every(w => TARGET.leen(clusters(w)).size), 'every p77-78 word contains a leen');
+  ok(TARGET.leen(clusters('يَوْمَ')).size === 1 && TARGET.leen(clusters('كَيْفَ')).size === 1,
+     'يَوْمَ and كَيْفَ each have exactly one leen');
+  ok(!TARGET.leen(clusters('قُلْ')).size, 'a sukoon on ل is not a leen');
+  ok(SYL_SK.every(w => w.endsWith(SK)), 'every p63-65 syllable ends in a sukoon');
+  ok(SK2.every(w => clusters(w).length === 2), 'p66-67 items are two letters');
+  ok(MEEM_SK.every(w => w.includes('م' + SK)), 'every p74 item carries a sakin meem');
+  ok(NOON_W.every(w => w.includes('ن' + SK)), 'every p75-76 item carries a sakin noon');
+  const a5 = FLAT.find(l => l.id === '5a');
+  ok(a5.items.every(it => it.options.filter(o => QALQ.includes(o)).length === 1),
+     '5a: exactly one option bounces');
+  ok(a5.items.every(it => it.options.includes(it.answer) && QALQ.includes(it.answer)),
+     '5a: the answer is present and is a قلقلة letter');
+  // Word sets are as long as the book's page is - the leen list is 14 words, not 28.
+  // What matters is that a set exists and is long enough not to repeat immediately.
+  ok(FLAT.filter(l => l.ex === 'balloon').every(l => l.items && l.items.length >= 12),
+     'every balloon level has a workable set of items');
+  ok(FLAT.filter(l => ['spot','balloon'].includes(l.ex)).every(l => l.items.every(w => w.trim())),
+     'no blank items anywhere');
   ok(FLAT.every(l => !l.items || new Set(l.items).size === l.items.length),
      'no duplicates inside a level');
   ok(qatGroups('يوم').join('|') === 'يو|م', 'يوم breaks as يو + م — waw joins ya, not meem (p18)');
