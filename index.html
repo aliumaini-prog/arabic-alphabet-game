@@ -23,6 +23,8 @@
   .ar{font-family:"Amiri","Geeza Pro","Al Bayan","Scheherazade New",serif;direction:rtl}
   .item,.big,.step,.chip{font-family:"Amiri Quran","Amiri","Geeza Pro",serif}
   .red{color:#d21f1f}
+  /* Colouring a whole cluster is safe; wrapping a bare letter would break the joining. */
+  .pickme{color:#2fa8e0}
 
   /* ---------- stage ---------- */
   /* Column layout, so the instruction banner can wrap to any number of lines on a
@@ -374,6 +376,18 @@ const doubledLetter = w => [...w].filter(c => !/[\u064B-\u0652\u0670]/.test(c)).
 // "رَبْ + بَ" — the book's own way of writing what a shadda is made of.
 const splitOf = (sakin, letter, h) => sakin + ' + ' + letter + h;
 
+/* ---- Cumulative review: naming the marks against each other ----
+   Every lesson so far teaches one mark on its own. Nothing yet asks a child to tell
+   zabar from zer from tanween from shadda in one breath, which is exactly where they
+   get confused. Marks are shown on a tatweel, the way the book prints them. */
+const MARK_NAMES = [
+  [F,  'zabar'], [K,  'zer'], [D,  'pesh'], [SK, 'jazm'],
+  [FN, 'do-zabar'], [KN, 'do-zer'], [DN, 'do-pesh'], [SH, 'tashdeed'],
+];
+const onTatweel = m => '\u0640' + m;
+// The mark that names a cluster: a shadda wins, since it is the one being taught.
+const markOf = c => c.includes(SH) ? SH : [FN, KN, DN, SK, F, K, D].find(m => c.includes(m));
+
 /* Split a word into clusters: a base letter plus whatever marks sit on it. Chips and
    spot-targets both work in clusters, so كِتَٰبُ offers كِ / تَٰ / بُ rather than bare letters. */
 function clusters(word) {
@@ -384,6 +398,8 @@ function clusters(word) {
   }
   return out;
 }
+const HARAKAT = /[ً-ْٰ]/g;
+const IS_MARK = /[ً-ْٰ]/;      // non-global: .test() on a /g regex is stateful
 const uniq    = a => [...new Set(a)];
 const pick    = a => a[Math.random() * a.length | 0];
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random()*(i+1)|0;
@@ -640,6 +656,34 @@ const LESSONS = [
       howto:'Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Double the letter, then hold the stretch for two counts — the dots keep the beat.',
       items: SH_MADD },
   ]},
+  { n:8, ar:'مراجعة', latin:'Review — all the marks together', levels:[
+    { id:'8a', ar:'اعراب ني پهچان', name:'Name the mark', book:'20-110', ex:'pick',
+      prompt:'Which mark is on the blue letter?',
+      teaches:'Telling every mark apart, across the whole book.',
+      howto:'Student <b>says the name of the mark on the blue letter</b> — zabar, zer, pesh, '
+          + 'jazm, do-zabar, do-zer, do-pesh or tashdeed. Tap what they say — '
+          + 'a wrong one <span class="no">flashes red</span>.',
+      items: (() => {
+        // Draw from every lesson that teaches a mark, so this is a real cumulative review.
+        const src = uniq(ZABAR.concat(ZER, PESH, SKW, QALQ_W, TN_WORDS, SH_WORDS));
+        const out = [];
+        for (const w of src) {
+          const cl = clusters(w);
+          // one item per word: the first cluster that carries a nameable mark
+          const k = cl.findIndex(c => markOf(c));
+          if (k < 0) continue;
+          const m = markOf(cl[k]);
+          const wrong = shuffle(MARK_NAMES.filter(([mm]) => mm !== m)).slice(0, 3);
+          out.push({
+            show: w,
+            html: cl.map((c, i) => i === k ? `<span class="pickme">${c}</span>` : c).join(''),
+            answer: onTatweel(m),
+            options: shuffle([m, ...wrong.map(([mm]) => mm)].map(onTatweel)),
+          });
+        }
+        return out;
+      })() },
+  ]},
 ];
 
 /* ==========================================================================
@@ -647,8 +691,6 @@ const LESSONS = [
    ========================================================================== */
 const $ = id => document.getElementById(id);
 const COLORS = ['#eb8fd4','#a9e05f','#f3e14f','#d9dee4','#8fd0f5','#f7a85c','#c3a6f0','#7fdcc0'];
-const HARAKAT = /[ً-ْٰ]/g;
-const IS_MARK = /[ً-ْٰ]/;      // non-global: .test() on a /g regex is stateful
 const bare = s => s.replace(HARAKAT, '');
 
 // A practice mode is a different activity on the same book pages, so each one gets
@@ -731,6 +773,16 @@ function qatGroups(word) {
 }
 
 /* ---------- scoring, shared by every exercise ---------- */
+/* A wrong tap part-way through an item is a strike: it is recorded so the report shows
+   the team kept picking the wrong madd letter, but it does NOT end the item or hand the
+   turn over - they stay on it until they get it. score() is for finishing an item. */
+function strike(item) {
+  missed++;
+  missLog.set(item, (missLog.get(item) || 0) + 1);
+  $('miss').textContent = missed;
+  saveProgress();
+}
+
 function score(ok, item) {
   if (ok) { hits++; blip(); if (teams.length) teams[turn].score++; }
   else { missed++; missLog.set(item, (missLog.get(item) || 0) + 1); }
@@ -849,8 +901,8 @@ function askForm() {
       if (el.classList.contains('good') || el.classList.contains('bad')) return;
       const good = o === formQ.right;
       el.classList.add(good ? 'good' : 'bad');
-      score(good, formQ.item);
-      if (good) setTimeout(askForm, 480);
+      if (good) { score(true, formQ.item); setTimeout(askForm, 480); }
+      else strike(formQ.item);
     };
     $('fopts').appendChild(el);
   }
@@ -970,6 +1022,7 @@ function drawJoin() {
     el.onclick = () => {
       if (ch !== want) {                     // wrong letter, or wrong shape, or out of order
         el.classList.remove('wrong'); void el.offsetWidth; el.classList.add('wrong');
+        strike(word);
         return;
       }
       buildQ.usedKeys = buildQ.usedKeys || new Set();
@@ -1005,7 +1058,7 @@ function askSpot() {
       if (spotQ.done) return;
       if (want.has(k)) { spotQ.done = true; el.classList.add('good'); score(true, word); revealSpot(k); }
       else { el.classList.remove('wrong'); void el.offsetWidth; el.classList.add('wrong');
-             score(false, word); }
+             strike(word); }
     };
     $('jactions').appendChild(el);
   });
@@ -1043,8 +1096,8 @@ function askPick() {
   const it = nextItem(lv.items);          // {show, answer, options}
   pickQ = it;
   $('fq').textContent = lv.prompt;
-  $('fshow').textContent = it.show;
-  $('fshow').style.display = it.show ? '' : 'none';   // 5a asks only about the options
+  if (it.html) $('fshow').innerHTML = it.html; else $('fshow').textContent = it.show;
+  $('fshow').style.display = (it.show || it.html) ? '' : 'none';  // 5a asks only about the options
   $('fopts').innerHTML = '';
   for (const o of it.options) {
     const el = document.createElement('div');
@@ -1055,8 +1108,8 @@ function askPick() {
       if (el.classList.contains('good')) return;
       const good = o === it.answer;
       el.classList.add(good ? 'good' : 'bad');
-      score(good, it.show);
-      if (good) setTimeout(askPick, 480);
+      if (good) { score(true, it.show); setTimeout(askPick, 480); }
+      else strike(it.show);
     };
     $('fopts').appendChild(el);
   }
@@ -1120,7 +1173,9 @@ function loadProgress() {
 function showReport() {
   const all = loadProgress();
   const who = $('who').value.trim() || 'this device';
-  let html = `<h2>${who} — missed items, and the page to reopen</h2>`;
+  let html = `<h2>${who} — what to drill, and the page to reopen</h2>`
+           + '<p style="font-size:calc(12px * var(--ui));opacity:.65;margin-bottom:6px">'
+           + 'Counts include every wrong tap, not just items given up on.</p>';
   let any = false;
   for (const lv of FLAT) {
     const rec = all[lv.id];
@@ -1225,7 +1280,7 @@ function runSelfTest() {
      'zabar/zer/pesh are U+064E / U+0650 / U+064F');
   ok(vowelled('ا', K) === 'إ' + K && vowelled('ا', F) === 'أ' + F,
      'vowelled alif is written أ / إ as on p20 and p25');
-  ok(FLAT.length === 37, `37 activities (got ${FLAT.length})`);
+  ok(FLAT.length === 38, `38 activities (got ${FLAT.length})`);
   ok(FLAT.filter(l => l.ex === 'join').length === 4,
      'each join level appears twice: find the letters, and pick the shape');
   ok(!FLAT.some(l => l.mode === 'build'), 'the build-it-up mode is gone');
@@ -1371,6 +1426,25 @@ function runSelfTest() {
   const allText = FLAT.flatMap(l => (l.items || []).map(it => typeof it === 'string' ? it : it.show));
   ok(allText.every(w => w === w.normalize('NFC')),
      'every item is in NFC, so equal-looking strings really are equal');
+
+  // --- cumulative review + wrong-tap tracking
+  const a8 = FLAT.find(l => l.id === '8a');
+  ok(a8 && a8.items.length > 150, `8a draws on the whole book (got ${a8 ? a8.items.length : 0})`);
+  ok(a8.items.every(it => it.options.length === 4 && it.options.includes(it.answer)),
+     '8a offers four marks and includes the right one');
+  ok(a8.items.every(it => it.html.includes('class="pickme"')),
+     '8a highlights exactly the cluster being asked about');
+  ok(a8.items.every(it => {
+       const k = it.html.indexOf('<span class="pickme">');
+       const c = it.html.slice(k + 21, it.html.indexOf('</span>', k));
+       return it.answer === onTatweel(markOf(c));
+     }), '8a: the answer really is the mark on the highlighted cluster');
+  ok(markOf('بَّ') === SH && markOf('بً') === FN && markOf('بْ') === SK,
+     'markOf names shadda over its vowel, and tells tanween from a single harakat');
+  ok(typeof strike === 'function', 'wrong taps are recorded by strike()');
+  ok(strike.toString().includes('missLog'), 'strike() writes to the miss log');
+  ok(!strike.toString().includes('passTurn'),
+     'a strike does not hand the turn over - the team stays on the item');
   // Word sets are as long as the book's page is - the leen list is 14 words, not 28.
   // What matters is that a set exists and is long enough not to repeat immediately.
   ok(FLAT.filter(l => l.ex === 'balloon').every(l => l.items && l.items.length >= 12),

@@ -101,6 +101,16 @@ that rule.
 Page 91 spells the rule out — **وَبَثَّ = وَبَثْ + ثَ** — so the shadda form is *derived*
 from the sakin form and checked against it. The pairs cannot drift from the book.
 
+## Review — all the marks together
+
+| Activity | Book | What it tests | Who judges |
+|---|---|---|---|
+| 8a Name the mark | 20–110 | zabar / zer / pesh / jazm / the three tanween / tashdeed | **the game** |
+
+Every lesson teaches one mark on its own. This is the only activity that makes a child
+tell them apart in one breath, which is where they actually get confused. 351 items drawn
+from every lesson that teaches a mark.
+
 ## All seven lessons
 
 The complete Qaidah, pages 1–110, in 37 activities. Fourteen are judged by the game
@@ -118,7 +128,9 @@ The complete Qaidah, pages 1–110, in 37 activities. Fourteen are judged by the
 - Type the **student's name** — score and missed items are kept per student.
 - Pick the lesson and level; the yellow badge shows the **book page**.
 - Balloon levels: child says it aloud, you tap to pop. Spacebar pauses.
-- **Report** lists what each student missed, grouped by level, with the page to reopen.
+- **Report** lists what to drill, grouped by level, with the page to reopen. Counts include
+  **every wrong tap**, not just items given up on — so a team that keeps picking the wrong
+  madd letter shows up even if they get there in the end.
 
 ## Editing content
 
