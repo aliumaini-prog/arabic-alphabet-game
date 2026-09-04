@@ -72,6 +72,22 @@ they are a metronome, not a judge.
 Lesson 5 is mostly sound, so most of it is yours to judge — but قلقلة and leen are both
 definable rules the game can check, and those are the ones a team can play unattended.
 
+## Lesson 6 — التنوين (book pages 79–89)
+
+| Activity | Book | What it tests | Who judges |
+|---|---|---|---|
+| 6a What does it sound like? | 80–89 | ـبًا **is** بَنْ — the book's اداء column | **the game** |
+| 6b Which tanween is it? | 80–89 | do-zabar / do-zer / do-pesh in a word | **the game** |
+| 6c Spot the tanween | 80–89 | which letter carries the mark | **the game** |
+| 6d Read tanween words | 80–89 | sounding the noon at the end | you |
+
+Tanween is the most rule-heavy lesson in the book, so three of its four activities are
+game-judged — a team can play the whole of 6a–6c with you only keeping order.
+
+The اداء column is **generated, not transcribed**: the book states that tanween is a noon
+sakinah you say but never write, so بَنْ is derived from بَ + ن + ْ and checked against
+that rule.
+
 ## Teams and the big screen
 
 - **Playing** — one student, or 2–4 teams. In teams, whose turn it is shows across the

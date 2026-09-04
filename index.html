@@ -87,12 +87,13 @@
   .q{font-size:calc(15px * var(--ui));color:#28536b;font-weight:600}
   .big{font-size:clamp(70px,17vw,calc(150px * var(--ui)));line-height:1.45;color:#123}
   .opts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
-  .opt{min-width:clamp(96px,10vw,calc(126px * var(--ui)));min-height:clamp(96px,10vw,calc(126px * var(--ui)));padding:6px 20px;
+  .opt{min-width:clamp(96px,10vw,calc(126px * var(--ui)));min-height:2.6em;padding:2px 20px;
     border:3px solid #cfe3ef;border-radius:18px;background:#fff;cursor:pointer;
     font-size:clamp(44px,5.6vw,calc(60px * var(--ui)));line-height:1.2;display:grid;place-items:center;
     transition:.12s}
-  .opt.lat{font-size:calc(21px * var(--ui));font-family:inherit;direction:ltr;min-height:78px;line-height:1.4}
-  .opt.lat .gl{top:0}
+  .opt.lat{font-size:calc(21px * var(--ui));font-family:inherit;direction:ltr;
+    min-height:3.4em;line-height:1.4}
+
   .opt:hover{border-color:#2fa8e0}
   .opt.good{border-color:#2fa04a;background:#e9f9ec}
   .opt.bad{border-color:#d21f1f;background:#fdecec;opacity:.6}
@@ -117,9 +118,14 @@
   .cell.on .cap{color:#28536b}
   .arrow{font-size:calc(30px * var(--ui));color:#8aa4b5;align-self:center}
   .waiting{color:#c9d8e2}
-  .gl{display:block;position:relative;top:-0.6em}   /* centres Amiri's ink, see note above */
-  .chip{min-width:clamp(74px,8.5vw,calc(108px * var(--ui)));min-height:clamp(74px,8.5vw,calc(108px * var(--ui)));
-    font-size:clamp(38px,5vw,calc(58px * var(--ui)));line-height:1.2;padding:6px 18px;overflow:hidden;
+  /* The lift that used to live here was derived from BARE letters and pushed the
+     harakat on مَنْ / بًا clean out of the top of the box. Working it through: with the
+     line box centred, the baseline lands at H/2 + (ascent-descent)/2 whatever the
+     line-height, so the only real fix is a box tall enough for the ink. Sizing in em
+     makes that hold for Amiri (ascent 1.83em) and the Geeza fallback (1.12em) alike. */
+  .gl{display:block}
+  .chip{min-width:clamp(74px,8.5vw,calc(108px * var(--ui)));min-height:2.6em;
+    font-size:clamp(38px,5vw,calc(58px * var(--ui)));line-height:1.2;padding:2px 18px;
     border:3px solid #cfe3ef;border-radius:16px;
     background:#fff;cursor:pointer;display:grid;place-items:center;transition:.12s}
   .chip:hover{border-color:#2fa8e0}
@@ -325,6 +331,29 @@ const NOON_W  = ["مِنْ أَهْلِ", "مَنْ أَسْلَمَ", "تَأْ
 // p77-78 اللين: a ya or waw carrying sukoon straight after a fatha
 const LEEN_W  = ["عَلَيْكُمْ", "رَيْبَ", "غَيْرِ", "قَوْسَيْنِ", "كَيْفَ", "عَلَيْهِ", "لَيْسَ", "يَوْمَ", "قَوْمُ", "فِرْعَوْنَ", "مَوْعِدُهُمْ", "فَنَادَوْا", "فَتَمَارَوْا", "يَرَوْا"];
 
+
+/* ---- Lesson 6, التنوين — transcribed from book pages 80-89 ---- */
+const FN = '\u064B', DN = '\u064C', KN = '\u064D';   // fathatain, dammatain, kasratain
+// p80 footnote: tanween IS a noon sakinah - pronounced at the end of the word but
+// never written. Its signs are ً ٍ ٌ. That is why the "اداء" column exists, and it is
+// generated here rather than transcribed: base + harakat + نْ, exactly as the book prints.
+const TANWEEN = [
+  { mark: FN, pair: F, ar: 'زبر تنوين', latin: 'do-zabar', book: '80-82',
+    rows: [["ب", "أَرْبَابًا"], ["ت", "بَيْتًا"], ["ث", "إِنَثًا"], ["ج", "خَرْجًا"], ["ح", "مَرَحًا"], ["خ", "شَيْخًا"], ["د", "رَغَدًا"], ["ذ", "إِذًا"], ["ر", "نَارًا"], ["ز", "عَزِيزًا"], ["س", "رِجْسًا"], ["ض", "مَرِيضًا"], ["ط", "مُحِيطًا"], ["ظ", "حَفِيظًا"], ["ع", "جَمِيعًا"], ["غ", "فَرِغًا"], ["ف", "لَطِيفًا"], ["ق", "مِيثَقًا"], ["ك", "مُبَارَكًا"], ["ل", "ظَلِيلًا"], ["م", "عَلِيمًا"], ["ن", "مُبِينًا"], ["و", "هُزُوًا"], ["ه", "إِلَهًا"], ["ي", "وَحْيًا"]] },
+  { mark: KN, pair: K, ar: 'زير تنوين', latin: 'do-zer',   book: '84-86',
+    rows: [["ء", "شَىْءٍ"], ["ب", "بِغَضَبٍ"], ["ت", "مُحْصَنَتٍ"], ["ث", "غَيْثٍ"], ["ج", "مَرِيجٍ"], ["ح", "نُوحٍ"], ["د", "عَادٍ"], ["ذ", "يَوْمَئِذٍ"], ["ر", "أَجْرٍ"], ["ز", "جَازٍ"], ["س", "نَفْسٍ"], ["ش", "قُرَيْشٍ"], ["ص", "مَحِيصٍ"], ["ض", "لِبَعْضٍ"], ["ط", "لُوطٍ"], ["ع", "شَفِيعٍ"], ["ف", "أَلِفٍ"], ["ق", "صِدْقٍ"], ["ل", "فَضْلٍ"], ["م", "عِلْمٍ"], ["ن", "سُلْطَنٍ"], ["ه", "إِلَهٍ"], ["ة", "بِصَدَقَةٍ"]] },
+  { mark: DN, pair: D, ar: 'پيش تنوين', latin: 'do-pesh',  book: '87-89',
+    rows: [["ء", "نَبَأٌ"], ["ب", "عَذَابٌ"], ["ت", "مُحْكَمَتٌ"], ["ث", "وَحَرْثٌ"], ["ج", "حَرَجٌ"], ["ح", "صَلِحٌ"], ["خ", "بَرْزَخٌ"], ["د", "شَهِيدٌ"], ["ر", "خَيْرٌ"], ["ز", "عَزِيزٌ"], ["س", "رِجْسٌ"], ["ش", "عَرْشٌ"], ["ص", "حَرِيصٌ"], ["ض", "مَرَضٌ"], ["ط", "صِرَاطٌ"], ["ظ", "حَفِيظٌ"], ["ع", "سَمِيعٌ"], ["ف", "خَوْفٌ"], ["ق", "مِيثَقٌ"], ["ك", "مَلَكٌ"], ["ل", "وَأَمْوَلٌ"], ["م", "عَلِيمٌ"], ["ن", "مُبِينٌ"], ["ه", "إِلَهٌ"], ["ة", "أَرْبَعَةٌ"]] },
+];
+// p83: when tanween-fatha lands on an alif maqsura the alif is written ى
+const MAQSURA_TN = ["عَمًى", "سُدًى", "مَوْلًى", "طُوًى"];
+
+// The written form (تنوين column): fathatain carries an alif, the other two do not.
+const tanweenForm = (l, mark) => l + mark + (mark === FN ? 'ا' : '');
+// The spoken form (اداء column): the harakat, then a noon with sukoon.
+const tanweenSound = (l, pair) => l + pair + 'ن' + SK;
+const TN_WORDS = TANWEEN.flatMap(t => t.rows.map(r => r[1]));
+
 /* Split a word into clusters: a base letter plus whatever marks sit on it. Chips and
    spot-targets both work in clusters, so كِتَٰبُ offers كِ / تَٰ / بُ rather than bare letters. */
 function clusters(word) {
@@ -355,6 +384,8 @@ const TARGET = {
   // p71: a قطب جد letter carrying a sukoon is what bounces
   qalq:    cl => new Set(cl.flatMap((c, i) => QALQ.includes(c[0]) && c.includes(SK) ? [i] : [])),
   // p77-78: a ya or waw with sukoon, directly after a fatha
+  // any of the three tanween marks
+  tanween: cl => new Set(cl.flatMap((c, i) => /[ًٌٍ]/.test(c) ? [i] : [])),
   leen:    cl => new Set(cl.flatMap((c, i) =>
              (c[0] === 'ي' || c[0] === 'و') && c.includes(SK) && i > 0 && cl[i - 1].includes(F)
                ? [i] : [])),
@@ -513,6 +544,42 @@ const LESSONS = [
       teaches:'Read ـَيْ and ـَوْ smoothly, without stretching them.',
       howto:'Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Say the leen smoothly — it is not stretched like a madd.',
       items: LEEN_W },
+  ]},
+  { n:6, ar:'التنوين', latin:'At-Tanween', levels:[
+    { id:'6a', ar:'اداء', name:'What does it sound like?', book:'80-89', ex:'pick',
+      prompt:'What does this sound like?',
+      teaches:'Tanween is a noon you say but never write.',
+      howto:'Student <b>says what the tanween sounds like</b> — the mark is written, '
+          + 'but a <b class="ar">ن</b> is what you hear. Tap what they say — '
+          + 'a wrong one <span class="no">flashes red</span>.',
+      items: TANWEEN.flatMap(t => t.rows.map(([l]) => ({
+        show: tanweenForm(l, t.mark),
+        answer: tanweenSound(l, t.pair),
+        options: shuffle(TANWEEN.map(o => tanweenSound(l, o.pair))) }))) },
+
+    { id:'6b', ar:'كون سو تنوين', name:'Which tanween is it?', book:'80-89', ex:'pick',
+      prompt:'Which tanween is on this word?',
+      teaches:'Telling do-zabar, do-zer and do-pesh apart in a real word.',
+      howto:'Student <b>reads the word, then says which tanween it carries</b> — '
+          + 'do-zabar, do-zer or do-pesh. Tap what they say — '
+          + 'a wrong one <span class="no">flashes red</span>.',
+      items: TANWEEN.flatMap(t => t.rows.map(([, w]) => ({
+        show: w, answer: t.latin, options: TANWEEN.map(o => o.latin) }))) },
+
+    { id:'6c', ar:'التنوين ني پهچان', name:'Spot the tanween', book:'80-89', ex:'spot',
+      target:'tanween',
+      reveal:'{} carries the tanween — say the mark, then a noon after it.',
+      teaches:'Finding which letter carries the tanween.',
+      howto:'Student <b>reads the word, then says which letter carries the tanween</b>. '
+          + 'Tap what they say — a wrong one <span class="no">flashes red</span>.',
+      items: TN_WORDS },
+
+    { id:'6d', ar:'التنوين نا الفاظ', name:'Read tanween words', book:'80-89', ex:'balloon',
+      rise:12, gap:4.5,
+      teaches:'Sound the noon clearly at the end of the word.',
+      howto:'Student <b>reads the word out loud</b>. Tap its balloon as they say it — a balloon that floats away counts as missed. Sound the <b class="ar">ن</b> clearly at the end — and on '
+          + '<b class="ar">عَمًى</b> the alif is written <b class="ar">ى</b> (p83).',
+      items: uniq(TN_WORDS.concat(MAQSURA_TN)) },
   ]},
 ];
 
@@ -922,7 +989,8 @@ function askPick() {
   $('fopts').innerHTML = '';
   for (const o of it.options) {
     const el = document.createElement('div');
-    el.className = 'opt ar';
+    const latin = /^[a-z-]+$/i.test(o);          // 6b answers with words, not letters
+    el.className = 'opt' + (latin ? ' lat' : ' ar');
     el.innerHTML = `<span class="gl">${o}</span>`;
     el.onclick = () => {
       if (el.classList.contains('good')) return;
@@ -1098,7 +1166,7 @@ function runSelfTest() {
      'zabar/zer/pesh are U+064E / U+0650 / U+064F');
   ok(vowelled('ا', K) === 'إ' + K && vowelled('ا', F) === 'أ' + F,
      'vowelled alif is written أ / إ as on p20 and p25');
-  ok(FLAT.length === 28, `28 activities (got ${FLAT.length})`);
+  ok(FLAT.length === 32, `32 activities (got ${FLAT.length})`);
   ok(FLAT.filter(l => l.ex === 'join').length === 4,
      'each join level appears twice: find the letters, and pick the shape');
   ok(!FLAT.some(l => l.mode === 'build'), 'the build-it-up mode is gone');
@@ -1186,6 +1254,37 @@ function runSelfTest() {
      '5a: exactly one option bounces');
   ok(a5.items.every(it => it.options.includes(it.answer) && QALQ.includes(it.answer)),
      '5a: the answer is present and is a قلقلة letter');
+
+  // --- Lesson 6: tanween is a noon you say and never write, so the اداء column is
+  // generated from the rule rather than transcribed - and can be checked against it.
+  const L6 = FLAT.filter(l => l.lesson.n === 6);
+  ok(L6.length === 4, `lesson 6 has 4 activities (got ${L6.length})`);
+  ok(TANWEEN.map(t => t.rows.length).join(',') === '25,23,25',
+     'the book tables are 25 / 23 / 25 rows (p80-82, 84-86, 87-89)');
+  ok(TANWEEN.every(t => t.rows.every(([, w]) => w.includes(t.mark))),
+     'every example word carries the tanween its table teaches');
+  ok(TANWEEN.every(t => t.rows.every(([, w]) =>
+       [FN, KN, DN].filter(m => w.includes(m)).length === 1)),
+     'no example word carries two different tanween marks');
+  ok(TANWEEN.every(t => t.rows.every(([l, w]) =>
+       [...(l === 'ء' ? 'ءأإؤئ' : l)].some(c => w.includes(c + t.mark)))),
+     'the row letter is the one carrying the tanween (hamza may sit on a carrier)');
+  ok(tanweenForm('ب', FN) === 'ب' + FN + 'ا' && tanweenForm('ب', KN) === 'ب' + KN,
+     'fathatain is written with an alif, kasratain is not (p80 vs p84)');
+  ok(tanweenSound('ب', F) === 'ب' + F + 'ن' + SK, 'ـبًا sounds like بَنْ (the اداء column)');
+  const a6 = FLAT.find(l => l.id === '6a');
+  ok(a6.items.length === 73, `6a covers all 73 table rows (got ${a6.items.length})`);
+  ok(a6.items.every(it => it.options.length === 3 && it.options.includes(it.answer)),
+     '6a offers all three noon sounds and includes the right one');
+  ok(a6.items.every(it => it.answer.endsWith('ن' + SK)), '6a answers all end in a sakin noon');
+  const b6 = FLAT.find(l => l.id === '6b');
+  ok(b6.items.every(it => ['do-zabar','do-zer','do-pesh'].includes(it.answer)),
+     '6b answers name one of the three tanween');
+  ok(TN_WORDS.every(w => TARGET.tanween(clusters(w)).size),
+     'every tanween word has a tappable tanween');
+  ok(!TARGET.tanween(clusters('كَتَبَ')).size, 'a word with no tanween offers no answer');
+  ok(MAQSURA_TN.every(w => w.includes(FN) && w.endsWith('ى')),
+     'p83: tanween-fatha on an alif maqsura, written ى');
   // Word sets are as long as the book's page is - the leen list is 14 words, not 28.
   // What matters is that a set exists and is long enough not to repeat immediately.
   ok(FLAT.filter(l => l.ex === 'balloon').every(l => l.items && l.items.length >= 12),
